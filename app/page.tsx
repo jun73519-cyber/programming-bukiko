@@ -1,35 +1,15 @@
-import { Workspace } from "@/components/workspace/Workspace";
-import positionsData from "@/data/positions.json";
-import candidatesData from "@/data/candidates.json";
-import workspaceData from "@/data/workspace.json";
-import {
-  departmentsSchema,
-  candidatesSchema,
-  workspaceSchema,
-} from "@/lib/schema";
+import { ArsenalWorkspace } from "@/components/arsenal/ArsenalWorkspace";
+import toolsData from "@/data/tools.json";
+import { toolsDataSchema } from "@/lib/schema";
 
 export default function Page() {
-  const deptResult = departmentsSchema.safeParse(positionsData);
-  const candResult = candidatesSchema.safeParse(candidatesData);
-  const wsResult = workspaceSchema.safeParse(workspaceData);
+  const result = toolsDataSchema.safeParse(toolsData);
 
-  if (!deptResult.success || !candResult.success || !wsResult.success) {
-    const errors = [
-      !deptResult.success &&
-        `positions.json: ${deptResult.error.issues[0]?.message}`,
-      !candResult.success &&
-        `candidates.json: ${candResult.error.issues[0]?.message}`,
-      !wsResult.success &&
-        `workspace.json: ${wsResult.error.issues[0]?.message}`,
-    ].filter(Boolean);
-    throw new Error(`データの形式が正しくありません:\n${errors.join("\n")}`);
+  if (!result.success) {
+    throw new Error(
+      `tools.json の形式が正しくありません: ${result.error.issues[0]?.message}`,
+    );
   }
 
-  return (
-    <Workspace
-      initialDepartments={deptResult.data}
-      initialCandidates={candResult.data}
-      workspace={wsResult.data}
-    />
-  );
+  return <ArsenalWorkspace categories={result.data.categories} />;
 }

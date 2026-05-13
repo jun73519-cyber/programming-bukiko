@@ -220,3 +220,40 @@ export type CandidateRow = {
 export type Group =
   | { kind: "stage"; stage: StageKey; label: string; items: CandidateRow[] }
   | { kind: "archived"; label: string; items: CandidateRow[] };
+
+// ===== 武器庫ドメイン =====
+
+export const toolStatusSchema = z.enum(["active", "wip"]);
+export type ToolStatus = z.infer<typeof toolStatusSchema>;
+
+/** 実行情報の1行。任意のラベルと値のペア。 */
+export const execInfoItemSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+});
+export type ExecInfoItem = z.infer<typeof execInfoItemSchema>;
+
+export const toolSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  tags: z.array(z.string()),
+  status: toolStatusSchema,
+  /** http(s):// 外部 URL または file:// ローカルパスを受け付ける */
+  url: z.string().optional(),
+  /** カスタムラベルで実行情報を定義する汎用フィールド */
+  execInfo: z.array(execInfoItemSchema).optional(),
+});
+export type Tool = z.infer<typeof toolSchema>;
+
+export const toolCategorySchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  tools: z.array(toolSchema),
+});
+export type ToolCategory = z.infer<typeof toolCategorySchema>;
+
+export const toolsDataSchema = z.object({
+  categories: z.array(toolCategorySchema),
+});
+export type ToolsData = z.infer<typeof toolsDataSchema>;

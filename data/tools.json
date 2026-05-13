@@ -1,0 +1,247 @@
+{
+  "categories": [
+    {
+      "id": "work",
+      "label": "仕事用",
+      "tools": [
+        {
+          "id": "work-order",
+          "name": "受注管理ツール",
+          "description": "受注して未請求の件を管理するメインツール。",
+          "tags": ["管理", "業務"],
+          "status": "active",
+          "url": "http://localhost:3001"
+        },
+        {
+          "id": "password-manager",
+          "name": "パスワード管理",
+          "description": "社名・ID・パスワードをブラウザの IndexedDB に保存し、検索・バックアップ（JSON）・復元ができる単体 HTML ツール。",
+          "tags": ["セキュリティ", "業務"],
+          "status": "active",
+          "url": "/パスワード管理.html",
+          "execInfo": [
+            { "label": "データ保存", "value": "このブラウザの IndexedDB" },
+            { "label": "バックアップ", "value": "JSON ファイルの書き出し／ファイルから復元" },
+            { "label": "同梱バックアップ例", "value": "サイト直下の passwords_backup (5).json（ブラウザで開くか、復元時にファイル選択）" }
+          ]
+        },
+        {
+          "id": "fax-template",
+          "name": "送り状フォーマット",
+          "description": "FAX 送り状用のレイアウトをブラウザで表示・印刷できる単体 HTML。社ロゴはサイト直下の画像を参照。",
+          "tags": ["送り状", "FAX", "業務"],
+          "status": "active",
+          "url": "/fax-template.html"
+        },
+        {
+          "id": "reply-templates",
+          "name": "返信定型文一覧",
+          "description": "メール返信用の定型文をブラウザの IndexedDB に保存。タイトル検索、{{変数名}} の置換プレビュー、本文コピー、reply_backup.json のバックアップ／一括復元ができる単体 HTML。",
+          "tags": ["メール", "定型文", "業務"],
+          "status": "active",
+          "url": "/reply_assistant.html",
+          "execInfo": [
+            { "label": "データ保存", "value": "このブラウザの IndexedDB（replyAssistantDB / templates）" },
+            { "label": "バックアップ", "value": "reply_backup.json のダウンロード／JSON ファイルからインポート（置換）" },
+            { "label": "静的ファイル", "value": "武器庫の public 配下（/reply_assistant.html）" }
+          ]
+        },
+        {
+          "id": "daily-order-report-mail",
+          "name": "受注報告メール自動起動ツール",
+          "description": "毎日定刻に、テキストファイルから当日分を抽出し、Thunderbird のメール作成画面を自動で開く。本文・件名は Python が組み立て、送信前に人が確認する運用向け。",
+          "tags": ["Python", "Thunderbird", "タスクスケジューラ", "メール", "業務"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/Desktop/sales-admin-tools",
+          "execInfo": [
+            { "label": "トリガー", "value": "Windows タスクスケジューラ（平日 17:30）" },
+            { "label": "作業ディレクトリ", "value": "Desktop\\sales-admin-tools\\" },
+            { "label": "データ", "value": "受注報告.txt（Shift_JIS）から当日 M/D ブロックを正規表現で抽出" },
+            { "label": "起動経路", "value": "run_report.bat → Python（stdout/stderr を log.txt に追記）" },
+            { "label": "メール", "value": "thunderbird.exe -compose（宛先・件名・本文を引数で渡す）" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "private",
+      "label": "プライベート",
+      "tools": [
+        {
+          "id": "ryuji-recipe",
+          "name": "リュウジレシピ",
+          "description": "リュウジ氏のレシピの中から、実際に作って「また食べたい」と思ったリピート確定の一品だけを厳選。膨大なアーカイブから自分のお気に入りだけを即座に引き出す、個人専用のレシピデータベース。",
+          "tags": ["お気に入り", "データベース"],
+          "status": "active",
+          "url": "https://ryuji-recipe-tracker.vercel.app/",
+          "execInfo": [
+            { "label": "コンセプト", "value": "リピート厳選" },
+            { "label": "データ源",   "value": "YouTube" },
+            { "label": "作業場所",   "value": "ローカル環境 (IndexedDB)" },
+            { "label": "ステータス", "value": "稼働中 (常時更新)" }
+          ]
+        },
+        {
+          "id": "osusume-list",
+          "name": "おすすめリスト",
+          "description": "おすすめされたお店や本をまとめたパーソナルリスト。スマホアプリとしても運用しており、外出先でも即座にチェック可能。",
+          "tags": ["パーソナル", "まとめ"],
+          "status": "active",
+          "url": "https://astounding-parfait-a0a052.netlify.app/%E3%81%8A%E3%81%99%E3%81%99%E3%82%81%E3%83%AA%E3%82%B9%E3%83%88.html",
+          "execInfo": [
+            { "label": "コンセプト", "value": "人からおすすめされた飲食店や本" },
+            { "label": "データ源",   "value": "Netlify (クラウド管理)" },
+            { "label": "利用形態",   "value": "PC / スマホアプリ完全同期" },
+            { "label": "ステータス", "value": "稼働中" }
+          ]
+        },
+        {
+          "id": "ai-news-slack-bot",
+          "name": "AIニュース要約Slackボット",
+          "description": "Anthropic社の最新記事をAIで要約してSlackに自動投稿するボット。GitHubで管理中。",
+          "tags": ["AI", "Slack", "自動化"],
+          "status": "active",
+          "url": "https://github.com/jun73519-cyber/anthropic-slack-bot",
+          "execInfo": [
+            { "label": "トリガー",   "value": "スケジュール実行（毎日午前9時）" },
+            { "label": "ソース元",   "value": "Webニュース（RSS/サイト）" },
+            { "label": "作業場所",   "value": "GitHub Actions" },
+            { "label": "届け先",     "value": "Slack" }
+          ]
+        },
+        {
+          "id": "google-fit-line-diet-report",
+          "name": "Google Fit × LINE ダイエットレポート",
+          "description": "Google Fit から歩数・体重を自動取得して LINE に Flex Message で毎日送信。週1で別ユーザーにも送信可能。",
+          "tags": ["Google Fit", "LINE", "自動化", "健康"],
+          "status": "active",
+          "url": "https://script.google.com/home/projects/1Nf-tTafSAHTDMtRx5L3C6xYy-sFqZwN2ZYtn2xpT4EZgMY4_aNyeaVgG/edit",
+          "execInfo": [
+            { "label": "トリガー", "value": "スケジュール実行（毎日16時半 / 毎週月曜）" },
+            { "label": "ソース元", "value": "Google Fit API" },
+            { "label": "作業場所", "value": "Google Apps Script" },
+            { "label": "届け先", "value": "LINE" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "learning",
+      "label": "学習用",
+      "tools": [
+        {
+          "id": "learning-ai-news",
+          "name": "AIニュース",
+          "description": "Xのタイムラインから２４時間以内のAI関連ニュースを自動収集し、Geminiで分析してSlackに投稿するツール",
+          "tags": ["AI", "X", "Slack", "Gemini", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/src/my-projects/ai-news",
+          "execInfo": [
+            { "label": "ソース元", "value": "X ホームタイムライン（24時間以内）" },
+            { "label": "処理", "value": "Gemini（Flash / Pro）で要約・トレンド分析" },
+            { "label": "届け先", "value": "Slack（Block Kit）" },
+            { "label": "実行基盤", "value": "GitHub Actions（定期）／ローカルは npm start" },
+            { "label": "ローカルパス", "value": "src\\my-projects\\ai-news" }
+          ]
+        },
+        {
+          "id": "personal-diagram-skill-guide",
+          "name": "パーソナル図解スキル作成ガイド（実務フロー構築スキル）",
+          "description": "手書きやスキャン画像（PDF/PNG）から実務フローを解析し、インタラクティブな Web 図解を生成するスキル。担当者別の色分けや、特定条件（更新手続きの有無など）に応じた分岐表現が可能。",
+          "tags": ["図解", "D3.js", "Mermaid.js", "Surge.sh", "学習"],
+          "status": "active",
+          "url": "https://diagram-sales-role-nozoe.surge.sh",
+          "execInfo": [
+            { "label": "技術", "value": "HTML / CSS / JavaScript（D3.js・Mermaid.js 等）" },
+            { "label": "スキル配置", "value": ".claude/skills/ 配下に構造化された指示ファイル" },
+            { "label": "ホスティング", "value": "Surge.sh による即時公開" },
+            { "label": "参考（実名版）", "value": "https://diagram-sales-role-real-nozoe.surge.sh" },
+            { "label": "参考（工夫まとめ）", "value": "https://diagram-craft-nozoe.surge.sh" }
+          ]
+        },
+        {
+          "id": "learning-diagram-feedback-tool",
+          "name": "図解＋フィードバックツール",
+          "description": "トピックを AI に伝えると図解 HTML を生成し、テキスト選択でコメントできるウィジェット付きで Surge に公開する学習用プロジェクト。コメントは Vercel の API と Neon Postgres に保存。",
+          "tags": ["図解", "フィードバック", "Next.js", "Surge.sh", "Vercel", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe/src/commenting-visual-explainers",
+          "execInfo": [
+            { "label": "ローカルパス", "value": "C:\\Users\\nozoe\\src\\commenting-visual-explainers" },
+            { "label": "図解", "value": "AI が output/ に HTML を生成 → deploy で Surge 公開" },
+            { "label": "フィードバック", "value": "widget 注入・Must/Better/Want の優先度・Neon で永続化" },
+            { "label": "セットアップ", "value": "Cursor で「セットアップして」→ setup-fb-tool スキルが対話ガイド" },
+            { "label": "詳細", "value": "リポジトリ直下 README.md" }
+          ]
+        },
+        {
+          "id": "learning-progress-dashboard",
+          "name": "進捗管理ダッシュボード",
+          "description": "Linear のタスクデータを取得し、健康度を計算して Gemini で改善提案を生成、HTML ダッシュボードを Surge に公開して Slack にスクリーンショットを通知するパイプライン。マガジン制作などチームの進捗を毎朝可視化する学習用プロジェクト。",
+          "tags": ["Linear", "Gemini", "Slack", "Surge.sh", "Playwright", "自動化", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe/src/progress-dashboard",
+          "execInfo": [
+            { "label": "ローカルパス", "value": "C:\\Users\\nozoe\\src\\progress-dashboard" },
+            { "label": "トリガー", "value": "GitHub Actions（平日朝 9 時 JST）／ローカルは npm run run-all" },
+            { "label": "ソース元", "value": "Linear API（ラベルグループでステータス判定）" },
+            { "label": "処理", "value": "健康度計算 → Gemini で AI 提案生成 → HTML 組み立て → Surge デプロイ → Playwright でスクリーンショット" },
+            { "label": "届け先", "value": "Slack（画像 3 枚 + サマリー）／Surge 上のダッシュボード URL" },
+            { "label": "詳細", "value": "リポジトリ直下 README.md" }
+          ]
+        },
+        {
+          "id": "learning-commit-report-tool",
+          "name": "コミットレポートツール（コミネコ）",
+          "description": "GitHub のコミット履歴を Claude で分析し、開発の動きを図解レポートにまとめて Slack に毎朝自動投稿するツール。設定ファイル 2 行の書き換えだけで監視対象を切り替えられる学習用プロジェクト。",
+          "tags": ["GitHub", "Claude", "Slack", "Playwright", "自動化", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/src/commit-report-tool",
+          "execInfo": [
+            { "label": "ローカルパス", "value": "C:\\Users\\nozoe.HYPERGEAR\\src\\commit-report-tool" },
+            { "label": "トリガー", "value": "GitHub Actions（手動実行／定期実行はカスタマイズで有効化）" },
+            { "label": "ソース元", "value": "GitHub API（監視対象リポジトリの直近コミット）" },
+            { "label": "処理", "value": "Claude でビジネス視点の分析 → HTML 図解生成 → Playwright で画像化" },
+            { "label": "届け先", "value": "Slack（画像付きデイリーレポート）" },
+            { "label": "設定", "value": "configs/repos/your-repo.yml の owner / name を書き換えるだけで対象切り替え" },
+            { "label": "詳細", "value": "リポジトリ直下 README.md" }
+          ]
+        },
+        {
+          "id": "learning-creating-visual-explainers",
+          "name": "図解ツール",
+          "description": "わからない言葉やしくみを AI に伝えるだけで、初めて聞く人にもわかるように噛み砕いた図解 HTML を自動生成する学習用プロジェクト。output/ に図解が蓄積され、Surge で URL 公開もできる（コメント機能なしの素の図解版）。",
+          "tags": ["図解", "Cursor", "Surge.sh", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe/src/creating-visual-explainers",
+          "execInfo": [
+            { "label": "ローカルパス", "value": "C:\\Users\\nozoe\\src\\creating-visual-explainers" },
+            { "label": "使い方", "value": "Cursor のチャットで「○○を図解して」と依頼するだけ" },
+            { "label": "生成物", "value": "output/ 配下に HTML が蓄積（サンプル: Git / LLM / Cursor）" },
+            { "label": "共有", "value": "PDF 書き出し or Surge で URL 公開（初回のみセットアップ）" },
+            { "label": "備考", "value": "コメント付き版は『図解＋フィードバックツール』を参照" },
+            { "label": "詳細", "value": "リポジトリ直下 README.md" }
+          ]
+        },
+        {
+          "id": "learning-workspace-ui-kit",
+          "name": "workspace-ui-kit（4ペインUIひな形）",
+          "description": "「自分の思想を画面にする」月のひな形。採用管理サンプル（4ペイン構造）を土台に、自分の業務 UI へ作り変える学習用プロジェクト。Next.js 16 / React 19 / Tailwind v4 / shadcn/ui ベースで、designing-workspace-ui スキルが規律を守らせる。",
+          "tags": ["Next.js", "shadcn/ui", "Tailwind", "UI", "スキル", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/src/workspace-ui-kit",
+          "execInfo": [
+            { "label": "ローカルパス", "value": "C:\\Users\\nozoe.HYPERGEAR\\src\\workspace-ui-kit" },
+            { "label": "起動", "value": "npm install → npm run dev（http://localhost:3001）" },
+            { "label": "技術", "value": "Next.js 16 / React 19 / TypeScript strict / Tailwind v4 / shadcn/ui（base-nova）" },
+            { "label": "サンプル", "value": "採用管理の 4 ペイン（部署 / 候補者リスト / 候補者詳細 / 選考ステージ）" },
+            { "label": "スキル", "value": ".claude/skills/ に shadcn 純正 + designing-workspace-ui の 2 種を同梱" },
+            { "label": "進め方", "value": "道A（踏襲ルート）で改造／道B（自由ルート）でゼロから の 2 通り" },
+            { "label": "備考", "value": "この武器庫アプリ自体もこのひな形から派生" },
+            { "label": "詳細", "value": "リポジトリ直下 README.md" }
+          ]
+        }
+      ]
+    }
+  ]
+}

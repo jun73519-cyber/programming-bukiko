@@ -151,18 +151,18 @@
   --canvas: oklch(0.246 0.006 248.07);
   --popover: oklch(0.2668 0.0071 248.094);
   --popover-foreground: oklch(0.9168 0.0035 67.7802);
-  --primary: oklch(0.7441 0.1311 264.2789);
-  --primary-foreground: oklch(0.2077 0.0398 265.7549);
+  --primary: oklch(0.85 0.2 196);
+  --primary-foreground: oklch(0.1 0.02 220);
   --secondary: oklch(0.2972 0 0);
   --secondary-foreground: oklch(0.9168 0.0035 67.7802);
   --muted: oklch(0.2972 0 0);
-  --muted-foreground: oklch(0.709 0 0);
+  --muted-foreground: oklch(0.78 0.04 196);
   --accent: oklch(0.2972 0 0);
   --accent-foreground: oklch(0.9168 0.0035 67.7802);
   --destructive: oklch(0.6338 0.1208 21.0422);
-  --border: oklch(0.3211 0 0);
+  --border: oklch(0.45 0.1 196 / 0.45);
   --input: oklch(0.3211 0 0);
-  --ring: oklch(0.7441 0.1311 264.2789);
+  --ring: oklch(0.85 0.2 196);
   --chart-1: oklch(0.6318 0.06 244.8148);
   --chart-2: oklch(0.6441 0.0496 146.8813);
   --chart-3: oklch(0.719 0.1077 74.6093);
@@ -170,19 +170,21 @@
   --chart-5: oklch(0.7118 0.0129 286.0665);
   --sidebar: oklch(0.1989 0.0051 248.0841);
   --sidebar-foreground: oklch(0.9168 0.0035 67.7802);
-  --sidebar-primary: oklch(0.7441 0.1311 264.2789);
-  --sidebar-primary-foreground: oklch(0.2077 0.0398 265.7549);
+  --sidebar-primary: oklch(0.85 0.2 196);
+  --sidebar-primary-foreground: oklch(0.1 0.02 220);
   --sidebar-accent: oklch(0.2972 0 0);
   --sidebar-accent-foreground: oklch(0.9168 0.0035 67.7802);
-  --sidebar-border: oklch(0.3211 0 0);
-  --sidebar-ring: oklch(0.7441 0.1311 264.2789);
+  --sidebar-border: oklch(0.45 0.1 196 / 0.4);
+  --sidebar-ring: oklch(0.85 0.2 196);
   --destructive-foreground: oklch(1 0 0);
   --radius: 0.625rem;
-  --font-sans:
-    var(--font-inter), "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI",
-    system-ui, sans-serif;
+  --font-sans: "JetBrains Mono", "Hiragino Sans", "BIZ UDPGothic", ui-monospace, monospace;
   --font-serif: "Georgia", serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --neon-glow-sm: 0 0 8px oklch(0.85 0.2 196 / 0.7);
+  --neon-glow-md: 0 0 16px oklch(0.85 0.2 196 / 0.5), 0 0 32px oklch(0.85 0.2 196 / 0.25);
+  --neon-glow-lg: 0 0 20px oklch(0.85 0.2 196 / 1), 0 0 40px oklch(0.85 0.2 196 / 0.6), 0 0 60px oklch(0.85 0.2 196 / 0.3);
+  --neon-border: oklch(0.85 0.2 196 / 0.6);
   --shadow-color: #000000;
   --shadow-opacity: 0.3;
   --shadow-blur: 20px;
@@ -218,4 +220,192 @@
   html {
     @apply font-sans;
   }
+}
+
+@keyframes cyber-pulse {
+  0%, 100% { box-shadow: var(--neon-glow-sm, 0 0 8px oklch(0.85 0.2 196 / 0.7)); }
+  50%       { box-shadow: var(--neon-glow-md, 0 0 16px oklch(0.85 0.2 196 / 0.5), 0 0 32px oklch(0.85 0.2 196 / 0.25)); }
+}
+
+.hologram-panel {
+  position: relative;
+  background: oklch(0.07 0.03 215);
+  border-left: 2px solid oklch(0.85 0.2 196 / 0.7);
+  box-shadow: var(--neon-glow-md), inset 0 0 40px oklch(0.85 0.2 196 / 0.04);
+  animation: cyber-pulse 4s ease-in-out infinite;
+  overflow: hidden;
+}
+
+/* 背景画像レイヤー — シアントーンの軽いオーバーレイを重ねてホログラム感を演出 */
+.pane3-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(oklch(0.06 0.06 205 / 0.42), oklch(0.06 0.06 205 / 0.42)),
+    url('/pane3-visual.png') center / cover no-repeat;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hologram-panel::before {
+  /* 画像が主役のためグリッド線は非表示 */
+  display: none;
+}
+
+/* Pane3 本文は装飾レイヤー（::after スキャン z-index:3）より手前でクリック可能にする */
+.hologram-panel > *:not(.mech-corner):not(.pane3-bg) {
+  position: relative;
+  z-index: 5;
+}
+
+/* スキャンライン — Pane3 を上から下へゆっくり流れる */
+@keyframes cyber-scan {
+  0%   { transform: translateY(-4px); }
+  100% { transform: translateY(100vh); }
+}
+
+.hologram-panel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, oklch(0.85 0.2 196 / 0.6) 40%, oklch(0.85 0.2 196 / 0.9) 50%, oklch(0.85 0.2 196 / 0.6) 60%, transparent 100%);
+  box-shadow: 0 0 10px oklch(0.85 0.2 196 / 0.6), 0 0 20px oklch(0.85 0.2 196 / 0.3);
+  animation: cyber-scan 9s linear infinite;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Pane2 サイバーグリッド背景 */
+.pane2-cyber {
+  background:
+    linear-gradient(oklch(0.85 0.2 196 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.85 0.2 196 / 0.06) 1px, transparent 1px),
+    oklch(0.16 0.02 220);
+  background-size: 24px 24px, 24px 24px, auto;
+  box-shadow: 4px 0 16px oklch(0.85 0.2 196 / 0.12);
+}
+
+/* メカニカルフレーム — 四隅のコーナーブラケット */
+.mech-corner {
+  position: absolute;
+  z-index: 10;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+
+.mech-corner--tl { top: 5px;    left: 7px;  border-top: 2px solid oklch(0.85 0.2 196 / 0.95); border-left:  2px solid oklch(0.85 0.2 196 / 0.95); filter: drop-shadow(0 0 5px oklch(0.85 0.2 196 / 0.7)); }
+.mech-corner--tr { top: 5px;    right: 5px; border-top: 2px solid oklch(0.85 0.2 196 / 0.95); border-right: 2px solid oklch(0.85 0.2 196 / 0.95); filter: drop-shadow(0 0 5px oklch(0.85 0.2 196 / 0.7)); }
+.mech-corner--bl { bottom: 5px; left: 7px;  border-bottom: 2px solid oklch(0.85 0.2 196 / 0.95); border-left:  2px solid oklch(0.85 0.2 196 / 0.95); filter: drop-shadow(0 0 5px oklch(0.85 0.2 196 / 0.7)); }
+.mech-corner--br { bottom: 5px; right: 5px; border-bottom: 2px solid oklch(0.85 0.2 196 / 0.95); border-right: 2px solid oklch(0.85 0.2 196 / 0.95); filter: drop-shadow(0 0 5px oklch(0.85 0.2 196 / 0.7)); }
+
+/* コーナー交点のジョイント丸 */
+.mech-corner::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: oklch(0.85 0.2 196);
+  border-radius: 50%;
+  box-shadow: 0 0 8px oklch(0.85 0.2 196);
+}
+.mech-corner--tl::after { top: -1px;  left: -1px; }
+.mech-corner--tr::after { top: -1px;  right: -1px; }
+.mech-corner--bl::after { bottom: -1px; left: -1px; }
+.mech-corner--br::after { bottom: -1px; right: -1px; }
+
+/* 呼吸するネオンボタン */
+@keyframes breathe {
+  0%, 100% {
+    box-shadow: 0 0 6px oklch(0.85 0.2 196 / 0.5), 0 0 12px oklch(0.85 0.2 196 / 0.2);
+    border-color: oklch(0.85 0.2 196 / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 18px oklch(0.85 0.2 196 / 1), 0 0 36px oklch(0.85 0.2 196 / 0.6), 0 0 54px oklch(0.85 0.2 196 / 0.3);
+    border-color: oklch(0.85 0.2 196 / 1);
+  }
+}
+
+.neon-breathe {
+  border: 1px solid oklch(0.85 0.2 196 / 0.5);
+  animation: breathe 2.5s ease-in-out infinite;
+}
+
+/* タイトル・見出しのネオン白文字 */
+.neon-text {
+  color: oklch(0.97 0.015 196);
+  text-shadow: 0 0 12px oklch(0.85 0.2 196 / 0.5), 0 0 24px oklch(0.85 0.2 196 / 0.2);
+}
+
+/* セクションラベルのシアン */
+.neon-label {
+  color: oklch(0.75 0.15 196);
+  letter-spacing: 0.08em;
+}
+
+/* ツールリスト行: ホバーで浮き上がり + シアングロー */
+.cyber-list-item {
+  border: 1px solid transparent;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.cyber-list-item:hover:not(.cyber-list-item--active) {
+  transform: translateY(-2px);
+  border-color: oklch(0.85 0.2 196 / 0.4);
+  background-color: oklch(0.85 0.2 196 / 0.06);
+  box-shadow: 0 4px 14px oklch(0.85 0.2 196 / 0.2), 0 0 0 1px oklch(0.85 0.2 196 / 0.15);
+}
+
+.cyber-list-item--active {
+  border-color: oklch(0.85 0.2 196 / 0.65);
+  background-color: oklch(0.85 0.2 196 / 0.1);
+  box-shadow: 0 0 14px oklch(0.85 0.2 196 / 0.3);
+}
+
+/* ── Pane3 背景画像上のテキスト視認性 ─────────────────── */
+
+/* タイトル: 最大輝度シアン + 多重黒影 */
+.hologram-panel .neon-text {
+  color: oklch(0.93 0.22 196); /* #00ffff に近い輝くシアン */
+  font-weight: 700;
+  text-shadow:
+    2px 2px 4px oklch(0 0 0 / 0.9),
+    -1px -1px 0   oklch(0 0 0 / 0.8),
+    0 0 20px oklch(0.85 0.2 196 / 0.9),
+    0 0 40px oklch(0.85 0.2 196 / 0.5);
+}
+
+/* セクションラベル: ブライトシアン + 縁取り影 */
+.hologram-panel .neon-label {
+  color: oklch(0.88 0.2 196);
+  font-weight: 600;
+  text-shadow:
+    2px 2px 4px oklch(0 0 0 / 0.9),
+    -1px -1px 0   oklch(0 0 0 / 0.8),
+    0 0 12px oklch(0.85 0.2 196 / 0.7);
+}
+
+/* 本文・値テキスト全般: 純白 + 強い縁取り影 */
+.hologram-panel p,
+.hologram-panel dd,
+.hologram-panel dt,
+.hologram-panel span:not([aria-hidden]) {
+  color: oklch(0.99 0 0); /* 純白 */
+  font-weight: 500;
+  text-shadow:
+    2px 2px 4px oklch(0 0 0 / 0.9),
+    -1px -1px 0   oklch(0 0 0 / 0.8),
+    1px -1px 0    oklch(0 0 0 / 0.8),
+    -1px 1px 0    oklch(0 0 0 / 0.8);
+}
+
+/* テキスト座布団: 文字グループの後ろに薄い黒レイヤーを敷く */
+.pane3-content {
+  background: oklch(0 0 0 / 0.35);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(2px);
+  padding: 1.5rem 2rem;
 }

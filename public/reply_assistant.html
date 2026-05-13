@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>返信アシスタント</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --line: #d9e2ef;
+      --line-strong: #b8c8de;
+      --text: #203044;
+      --subtext: #5b6b80;
+      --primary: #2b6cb0;
+      --primary-hover: #235a92;
+      --danger: #c53030;
+      --danger-hover: #9f2626;
+      --accent: #edf3fb;
+      --ok: #276749;
+      --shadow: 0 4px 14px rgba(26, 45, 74, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Yu Gothic UI", "Meiryo", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .frame {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #fdfefe 0%, #f7faff 100%);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .left-wrap {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      min-height: calc(100vh - 48px);
+    }
+
+    .template-list {
+      margin: 0;
+      padding: 8px;
+      list-style: none;
+      overflow: auto;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .search-wrap {
+      padding: 10px 12px 0;
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .search-wrap input {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font-size: 14px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    .search-wrap input:focus {
+      border-color: #77a6de;
+      box-shadow: 0 0 0 3px rgba(88, 146, 216, 0.15);
+    }
+
+    .template-item button {
+      width: 100%;
+      text-align: left;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .template-item button:hover {
+      background: #f7fbff;
+      border-color: #d4e6fa;
+    }
+
+    .template-item button.active {
+      background: #ebf4ff;
+      border-color: #b6d1f1;
+      font-weight: 700;
+    }
+
+    .editor {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      background: #fbfdff;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--subtext);
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: #77a6de;
+      box-shadow: 0 0 0 3px rgba(88, 146, 216, 0.15);
+    }
+
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+      line-height: 1.65;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button.action {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: #eef4fc;
+      border-color: #c9daf0;
+      color: #285585;
+    }
+
+    .btn-secondary:hover {
+      background: #e4eefb;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: var(--danger-hover);
+    }
+
+    .preview-wrap {
+      display: grid;
+      grid-template-rows: auto auto auto 1fr;
+      min-height: calc(100vh - 48px);
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .preview-header .btn-copy {
+      flex-shrink: 0;
+    }
+
+    .vars {
+      padding: 12px 16px 8px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fbff;
+      display: grid;
+      gap: 8px;
+    }
+
+    .vars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .preview-toolbar {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fcfeff;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .status {
+      font-size: 13px;
+      color: var(--subtext);
+    }
+
+    .status.ok {
+      color: var(--ok);
+      font-weight: 700;
+    }
+
+    .status.err {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .backup-toolbar {
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fbff;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .backup-toolbar .backup-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .backup-toolbar .backup-row .action {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .backup-toolbar label.import-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .backup-toolbar label.import-label input {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .backup-hint {
+      position: fixed;
+      right: 16px;
+      bottom: 12px;
+      max-width: min(340px, calc(100vw - 32px));
+      margin: 0;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--subtext);
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .preview {
+      padding: 22px;
+      overflow: auto;
+      white-space: pre-wrap;
+      background: #fff;
+      line-height: 1.95;
+      font-size: 17px;
+    }
+
+    .empty {
+      color: #7a889b;
+      font-style: italic;
+    }
+
+    @media (max-width: 980px) {
+      .frame {
+        grid-template-columns: 1fr;
+      }
+
+      .left-wrap,
+      .preview-wrap {
+        min-height: auto;
+      }
+
+      .preview-header {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="frame">
+      <section class="panel left-wrap">
+        <div>
+          <div class="panel-header">定型文一覧</div>
+          <div class="search-wrap">
+            <input id="searchInput" type="text" placeholder="タイトルを検索..." />
+          </div>
+          <ul id="templateList" class="template-list"></ul>
+          <div class="backup-toolbar" aria-label="バックアップと復元">
+            <div class="backup-row">
+              <button
+                id="backupBtn"
+                class="action btn-secondary"
+                type="button"
+                title="登録済みの定型文を reply_backup.json で保存"
+              >
+                バックアップ（ダウンロード）
+              </button>
+            </div>
+            <div class="backup-row">
+              <label class="import-label action btn-secondary" title="JSON を IndexedDB に一括インポート">
+                <span>復元（インポート）</span>
+                <input id="importFile" type="file" accept=".json,application/json" />
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="editor">
+          <label>
+            タイトル
+            <input id="titleInput" type="text" placeholder="例: タイムスタンプ案内" />
+          </label>
+          <label>
+            本文
+            <textarea id="bodyInput" placeholder="本文を入力">{{宛先名}} 様
+
+いつもお世話になっております。
+よろしくお願いいたします。</textarea>
+          </label>
+          <div class="btn-row">
+            <button id="newBtn" class="action btn-secondary" type="button">新規</button>
+            <button id="saveBtn" class="action btn-primary" type="button">保存</button>
+            <button id="deleteBtn" class="action btn-danger" type="button">削除</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel preview-wrap">
+        <div class="panel-header preview-header">
+          <span>プレビュー</span>
+          <button id="copyBtn" class="action btn-secondary btn-copy" type="button">本文をコピー</button>
+        </div>
+        <div class="vars">
+          <div style="font-size:13px; font-weight:700; color:var(--subtext);">置換入力</div>
+          <div id="varsGrid" class="vars-grid"></div>
+        </div>
+        <div class="preview-toolbar">
+          <span id="copyStatus" class="status">コピー可能な本文を表示しています</span>
+        </div>
+        <div id="preview" class="preview empty">左側で定型文を選択または新規作成してください。</div>
+      </section>
+    </div>
+  </div>
+
+  <p class="backup-hint" role="note">
+    履歴削除でデータが消える可能性があるため、定期的にバックアップしてください。
+  </p>
+
+  <script>
+    const DB_NAME = "replyAssistantDB";
+    const STORE_NAME = "templates";
+    const DB_VERSION = 1;
+
+    const INITIAL_TEMPLATE = {
+      title: "タイムスタンプ案内",
+      body: `{{宛先名}} 様
+
+いつもお世話になっております。
+お見積りのご依頼ありがとうございます。
+
+恐れ入りますが、弊社ではタイムスタンプのみの販売は行っていませんので、アマノセキュアジャパン様へご依頼頂けますでしょうか。
+
+よろしくお願いいたします。`
+    };
+
+    let db;
+    let templates = [];
+    let selectedId = null;
+    let searchQuery = "";
+    let tokenValues = {
+      "宛先名": "",
+      "月": ""
+    };
+
+    const templateList = document.getElementById("templateList");
+    const searchInput = document.getElementById("searchInput");
+    const titleInput = document.getElementById("titleInput");
+    const bodyInput = document.getElementById("bodyInput");
+    const deleteBtn = document.getElementById("deleteBtn");
+    const newBtn = document.getElementById("newBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const varsGrid = document.getElementById("varsGrid");
+    const preview = document.getElementById("preview");
+    const copyBtn = document.getElementById("copyBtn");
+    const copyStatus = document.getElementById("copyStatus");
+    const backupBtn = document.getElementById("backupBtn");
+    const importFile = document.getElementById("importFile");
+
+    function flashToolbarStatus(message, ok) {
+      copyStatus.textContent = message;
+      copyStatus.classList.remove("ok", "err");
+      if (ok === true) {
+        copyStatus.classList.add("ok");
+      } else if (ok === false) {
+        copyStatus.classList.add("err");
+      }
+      setTimeout(() => {
+        copyStatus.textContent = "コピー可能な本文を表示しています";
+        copyStatus.classList.remove("ok", "err");
+      }, 2400);
+    }
+
+    function buildBackupPayload(list) {
+      return {
+        format: "reply_assistant_backup",
+        version: 1,
+        dbName: DB_NAME,
+        storeName: STORE_NAME,
+        exportedAt: new Date().toISOString(),
+        templates: list.map((t) => ({
+          id: t.id,
+          title: t.title || "",
+          body: t.body || "",
+        })),
+      };
+    }
+
+    function downloadJsonFile(filename, data) {
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json;charset=utf-8",
+      });
+      const anchor = document.createElement("a");
+      anchor.href = URL.createObjectURL(blob);
+      anchor.download = filename;
+      anchor.rel = "noopener";
+      document.body.appendChild(anchor);
+      anchor.click();
+      URL.revokeObjectURL(anchor.href);
+      anchor.remove();
+    }
+
+    async function backupAllTemplates() {
+      const store = getStore("readonly");
+      const list = await requestToPromise(store.getAll());
+      const payload = buildBackupPayload(list);
+      downloadJsonFile("reply_backup.json", payload);
+      flashToolbarStatus(`${list.length} 件を reply_backup.json に保存しました。`, true);
+    }
+
+    function normalizeImportedTemplates(parsed) {
+      let rows = [];
+      if (Array.isArray(parsed)) {
+        rows = parsed;
+      } else if (parsed && typeof parsed === "object") {
+        if (Array.isArray(parsed.templates)) {
+          rows = parsed.templates;
+        } else if (Array.isArray(parsed.items)) {
+          rows = parsed.items;
+        }
+      }
+      const out = [];
+      for (const row of rows) {
+        if (!row || typeof row !== "object") {
+          continue;
+        }
+        const title = String(row.title ?? row.name ?? "").trim();
+        const body = String(row.body ?? row.text ?? row.content ?? "");
+        const idRaw = row.id;
+        const idNum =
+          idRaw != null && idRaw !== "" && Number.isFinite(Number(idRaw)) ? Number(idRaw) : null;
+        if (!title && !body.trim()) {
+          continue;
+        }
+        out.push({ id: idNum, title, body });
+      }
+      return out;
+    }
+
+    async function replaceStoreWithTemplates(records) {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(STORE_NAME, "readwrite");
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+        const store = transaction.objectStore(STORE_NAME);
+        store.clear();
+        for (const rec of records) {
+          if (rec.id != null) {
+            store.put({ id: rec.id, title: rec.title, body: rec.body });
+          } else {
+            store.add({ title: rec.title, body: rec.body });
+          }
+        }
+      });
+    }
+
+    async function handleImportFileChange(event) {
+      const input = event.target;
+      const file = input.files && input.files[0];
+      input.value = "";
+      if (!file) {
+        return;
+      }
+      let text;
+      try {
+        text = await file.text();
+      } catch (e) {
+        console.error(e);
+        flashToolbarStatus("ファイルを読み込めませんでした。", false);
+        return;
+      }
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch (e) {
+        console.error(e);
+        flashToolbarStatus("JSON の形式が正しくありません。", false);
+        return;
+      }
+      const records = normalizeImportedTemplates(parsed);
+      if (!records.length) {
+        flashToolbarStatus("インポートできる定型文がありません。", false);
+        return;
+      }
+      const ok = confirm(
+        `IndexedDB の定型文を ${records.length} 件の内容で置き換えます。\n現在のデータは失われます。よろしいですか？`
+      );
+      if (!ok) {
+        return;
+      }
+      try {
+        await replaceStoreWithTemplates(records);
+        selectedId = null;
+        await loadTemplates();
+        flashToolbarStatus(`${records.length} 件をインポートしました。`, true);
+      } catch (e) {
+        console.error(e);
+        flashToolbarStatus("インポートに失敗しました。", false);
+        await loadTemplates();
+      }
+    }
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (event) => {
+          const upgradeDB = event.target.result;
+          if (!upgradeDB.objectStoreNames.contains(STORE_NAME)) {
+            upgradeDB.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function getStore(mode = "readonly") {
+      const tx = db.transaction(STORE_NAME, mode);
+      return tx.objectStore(STORE_NAME);
+    }
+
+    function requestToPromise(request) {
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function seedInitialDataIfNeeded() {
+      const store = getStore("readonly");
+      const count = await requestToPromise(store.count());
+      if (count > 0) {
+        return;
+      }
+      const writeStore = getStore("readwrite");
+      await requestToPromise(writeStore.add(INITIAL_TEMPLATE));
+    }
+
+    async function loadTemplates() {
+      const store = getStore("readonly");
+      const list = await requestToPromise(store.getAll());
+      templates = list.sort((a, b) => (a.id || 0) - (b.id || 0));
+      if (!templates.length) {
+        selectedId = null;
+      } else if (!templates.some((item) => item.id === selectedId)) {
+        selectedId = templates[0].id;
+      }
+      renderList();
+      syncEditorFromSelection();
+      renderTokens();
+      renderPreview();
+      updateDeleteButton();
+    }
+
+    function renderList() {
+      templateList.innerHTML = "";
+      const query = searchQuery.trim().toLowerCase();
+      const visibleTemplates = templates.filter((template) => {
+        const title = (template.title || "").toLowerCase();
+        return !query || title.includes(query);
+      });
+
+      if (!templates.length) {
+        const li = document.createElement("li");
+        li.className = "template-item";
+        li.innerHTML = '<button type="button">定型文がありません</button>';
+        li.querySelector("button").disabled = true;
+        templateList.appendChild(li);
+        return;
+      }
+
+      if (!visibleTemplates.length) {
+        const li = document.createElement("li");
+        li.className = "template-item";
+        li.innerHTML = '<button type="button">一致するタイトルがありません</button>';
+        li.querySelector("button").disabled = true;
+        templateList.appendChild(li);
+        return;
+      }
+
+      visibleTemplates.forEach((template) => {
+        const li = document.createElement("li");
+        li.className = "template-item";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = template.title || "(無題)";
+        if (template.id === selectedId) {
+          btn.classList.add("active");
+        }
+        btn.addEventListener("click", () => {
+          selectedId = template.id;
+          syncEditorFromSelection();
+          renderList();
+          renderTokens();
+          renderPreview();
+          updateDeleteButton();
+        });
+        li.appendChild(btn);
+        templateList.appendChild(li);
+      });
+    }
+
+    function getSelectedTemplate() {
+      return templates.find((item) => item.id === selectedId) || null;
+    }
+
+    function syncEditorFromSelection() {
+      const template = getSelectedTemplate();
+      if (!template) {
+        titleInput.value = "";
+        bodyInput.value = "";
+        return;
+      }
+      titleInput.value = template.title || "";
+      bodyInput.value = template.body || "";
+    }
+
+    function extractTokens(text) {
+      const set = new Set();
+      const regex = /{{\s*([^{}]+?)\s*}}/g;
+      let match;
+      while ((match = regex.exec(text)) !== null) {
+        set.add(match[1]);
+      }
+      return Array.from(set);
+    }
+
+    function renderTokens() {
+      varsGrid.innerHTML = "";
+      const body = bodyInput.value || "";
+      const tokens = extractTokens(body);
+
+      if (!tokens.length) {
+        const note = document.createElement("div");
+        note.className = "status";
+        note.textContent = "本文に {{変数名}} を含めると、ここに入力欄が表示されます。";
+        varsGrid.appendChild(note);
+        return;
+      }
+
+      tokens.forEach((token) => {
+        if (!(token in tokenValues)) {
+          tokenValues[token] = "";
+        }
+        const label = document.createElement("label");
+        label.textContent = token;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = tokenValues[token];
+        input.placeholder = "{{" + token + "}} の値";
+        input.addEventListener("input", () => {
+          tokenValues[token] = input.value;
+          renderPreview();
+        });
+        label.appendChild(input);
+        varsGrid.appendChild(label);
+      });
+    }
+
+    function replaceTokens(text) {
+      return text.replace(/{{\s*([^{}]+?)\s*}}/g, (_, token) => {
+        if (Object.prototype.hasOwnProperty.call(tokenValues, token)) {
+          return tokenValues[token];
+        }
+        return "";
+      });
+    }
+
+    function renderPreview() {
+      const raw = bodyInput.value || "";
+      if (!raw.trim()) {
+        preview.textContent = "本文が空です。";
+        preview.classList.add("empty");
+        return;
+      }
+      const rendered = replaceTokens(raw);
+      preview.textContent = rendered;
+      preview.classList.remove("empty");
+    }
+
+    function updateDeleteButton() {
+      deleteBtn.disabled = selectedId === null;
+      deleteBtn.style.opacity = deleteBtn.disabled ? "0.6" : "1";
+      deleteBtn.style.cursor = deleteBtn.disabled ? "not-allowed" : "pointer";
+    }
+
+    async function saveCurrentTemplate() {
+      const title = titleInput.value.trim();
+      const body = bodyInput.value;
+      if (!title) {
+        alert("タイトルを入力してください。");
+        titleInput.focus();
+        return;
+      }
+      if (!body.trim()) {
+        alert("本文を入力してください。");
+        bodyInput.focus();
+        return;
+      }
+
+      const store = getStore("readwrite");
+      if (selectedId === null) {
+        const newId = await requestToPromise(store.add({ title, body }));
+        selectedId = newId;
+      } else {
+        await requestToPromise(store.put({ id: selectedId, title, body }));
+      }
+      await loadTemplates();
+    }
+
+    async function deleteCurrentTemplate() {
+      if (selectedId === null) {
+        return;
+      }
+      const ok = confirm("選択中の定型文を削除しますか？");
+      if (!ok) {
+        return;
+      }
+      const store = getStore("readwrite");
+      await requestToPromise(store.delete(selectedId));
+      selectedId = null;
+      await loadTemplates();
+      copyStatus.textContent = "削除しました";
+      copyStatus.classList.add("ok");
+      setTimeout(() => {
+        copyStatus.textContent = "コピー可能な本文を表示しています";
+        copyStatus.classList.remove("ok");
+      }, 1400);
+    }
+
+    function resetEditorForNew() {
+      selectedId = null;
+      titleInput.value = "";
+      bodyInput.value = "";
+      renderList();
+      renderTokens();
+      renderPreview();
+      updateDeleteButton();
+      titleInput.focus();
+    }
+
+    async function copyPreviewToClipboard() {
+      const text = preview.textContent || "";
+      if (!text.trim() || preview.classList.contains("empty")) {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const fallback = document.createElement("textarea");
+        fallback.value = text;
+        document.body.appendChild(fallback);
+        fallback.select();
+        document.execCommand("copy");
+        document.body.removeChild(fallback);
+      }
+      copyStatus.textContent = "クリップボードにコピーしました";
+      copyStatus.classList.add("ok");
+      setTimeout(() => {
+        copyStatus.textContent = "コピー可能な本文を表示しています";
+        copyStatus.classList.remove("ok");
+      }, 1600);
+    }
+
+    function attachEvents() {
+      bodyInput.addEventListener("input", () => {
+        renderTokens();
+        renderPreview();
+      });
+      titleInput.addEventListener("input", () => {
+        renderList();
+      });
+      searchInput.addEventListener("input", () => {
+        searchQuery = searchInput.value;
+        renderList();
+      });
+      newBtn.addEventListener("click", resetEditorForNew);
+      saveBtn.addEventListener("click", saveCurrentTemplate);
+      deleteBtn.addEventListener("click", deleteCurrentTemplate);
+      copyBtn.addEventListener("click", copyPreviewToClipboard);
+      backupBtn.addEventListener("click", () => {
+        backupAllTemplates().catch((e) => {
+          console.error(e);
+          flashToolbarStatus("バックアップに失敗しました。", false);
+        });
+      });
+      importFile.addEventListener("change", handleImportFileChange);
+    }
+
+    async function initialize() {
+      db = await openDB();
+      await seedInitialDataIfNeeded();
+      attachEvents();
+      await loadTemplates();
+    }
+
+    initialize().catch((error) => {
+      console.error(error);
+      alert("初期化中にエラーが発生しました。ブラウザを再読み込みしてください。");
+    });
+  </script>
+</body>
+</html>

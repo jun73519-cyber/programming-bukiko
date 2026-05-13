@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>パスワード管理</title>
+<style>
+  :root {
+    --bg:       #f5f4f0;
+    --surface:  #ffffff;
+    --border:   #e8e6e0;
+    --text:     #2c2c2c;
+    --muted:    #888;
+    --primary:  #3b6fd4;
+    --primary-dk: #2d56aa;
+    --primary-lt: #eef2fc;
+    --green:    #2e9e6e;
+    --green-lt: #edfaf3;
+    --red:      #d95f5f;
+    --red-lt:   #fdf0f0;
+    --gold:     #c49a28;
+    --radius:   14px;
+    --shadow:   0 2px 8px rgba(0,0,0,.08);
+    --shadow-lg:0 6px 24px rgba(0,0,0,.13);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,.18);
+  }
+  header h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: .04em; }
+  header .count-badge {
+    background: rgba(255,255,255,.22);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    margin-left: auto;
+  }
+
+  .container { max-width: 820px; margin: 0 auto; padding: 20px 16px; }
+
+  .search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: var(--surface);
+    transition: border-color .15s;
+    outline: none;
+  }
+  .search-bar input:focus { border-color: var(--primary); }
+  .btn-clear-search {
+    padding: 0 14px;
+    border: none;
+    border-radius: 10px;
+    background: var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-clear-search:hover { background: #ddd; }
+
+  .form-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .form-card h2 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 0.76rem; font-weight: 600; color: var(--muted); }
+  .form-group input, .form-group textarea {
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s;
+    background: #fafafa;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); background: #fff; }
+  .form-group textarea { resize: vertical; min-height: 60px; }
+
+  .pw-wrap { position: relative; }
+  .pw-wrap input { width: 100%; padding-right: 42px; }
+  .btn-eye {
+    position: absolute;
+    right: 8px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    font-size: 1rem; color: var(--muted); padding: 4px;
+    line-height: 1;
+  }
+  .btn-eye:hover { color: var(--primary); }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .btn-add {
+    flex: 1;
+    padding: 12px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .btn-add:hover { background: var(--primary-dk); }
+  .btn-add:active { transform: scale(.97); }
+  .btn-reset {
+    padding: 12px 18px;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn-reset:hover { background: #ece9e3; }
+
+  #list { display: flex; flex-direction: column; gap: 12px; }
+
+  .item-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    animation: fadeUp .2s ease;
+    transition: box-shadow .2s;
+  }
+  .item-card:hover { box-shadow: var(--shadow-lg); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-company {
+    font-size: 1.05rem;
+    font-weight: 700;
+    flex: 1;
+    word-break: break-word;
+  }
+  .btn-icon {
+    background: none; border: none;
+    padding: 6px; border-radius: 8px;
+    font-size: 0.9rem; color: #ccc;
+    cursor: pointer; transition: color .15s, background .15s;
+    position: relative; z-index: 5;
+  }
+  .btn-icon:hover { color: var(--gold); background: #fdf5e8; }
+  .btn-icon.del:hover { color: var(--red); background: var(--red-lt); }
+
+  .card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+
+  .card-field { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .field-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--bg);
+    border-radius: 4px;
+    padding: 2px 7px;
+    white-space: nowrap;
+    min-width: 48px;
+    text-align: center;
+  }
+  .field-value {
+    font-size: 0.92rem;
+    color: var(--text);
+    word-break: break-all;
+    flex: 1;
+  }
+  .field-value.pw {
+    font-family: 'Courier New', monospace;
+    letter-spacing: .08em;
+  }
+  .field-value.masked { filter: blur(5px); user-select: none; cursor: pointer; transition: filter .2s; }
+  .field-value.masked:hover { filter: blur(0); }
+  .field-note { font-size: 0.85rem; color: var(--muted); white-space: pre-wrap; }
+
+  .btn-copy {
+    background: var(--primary-lt);
+    color: var(--primary);
+    border: none;
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+    white-space: nowrap;
+  }
+  .btn-copy:hover { background: #d6e4f7; }
+  .btn-copy.copied { background: var(--green-lt); color: var(--green); }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+    padding: 48px 20px;
+  }
+
+  #toast {
+    position: fixed;
+    bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #2c2c2c;
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity .22s, transform .22s;
+    pointer-events: none;
+    z-index: 9999;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    width: 100%; max-width: 480px;
+    padding: 24px;
+    animation: fadeUp .2s ease;
+  }
+  .modal-box h2 {
+    font-size: 1rem; font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--primary);
+  }
+  .modal-actions {
+    display: flex; gap: 8px; margin-top: 16px;
+  }
+  .btn-save {
+    flex: 1; padding: 12px;
+    background: var(--primary); color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; transition: background .15s;
+  }
+  .btn-save:hover { background: var(--primary-dk); }
+  .btn-cancel {
+    padding: 12px 18px;
+    background: var(--bg); color: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 10px; font-size: 0.9rem;
+    cursor: pointer; transition: background .15s;
+  }
+  .btn-cancel:hover { background: #ece9e3; }
+
+  .backup-bar {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .backup-bar .bar-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .backup-bar .bar-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn-export {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+  }
+  .btn-export:active { transform: scale(.96); }
+  .btn-export.json {
+    background: #e8f0fe;
+    color: #2d56aa;
+  }
+  .btn-export.json:hover { background: #d0e2fc; }
+  .btn-export.csv {
+    background: #e6f4ea;
+    color: #1e7e45;
+  }
+  .btn-export.csv:hover { background: #c8ecd2; }
+  .btn-import-label {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s;
+    background: #fef3e2;
+    color: #a05c00;
+  }
+  .btn-import-label:hover { background: #fde4b8; }
+  #import-file { display: none; }
+  .import-mode-select {
+    padding: 6px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    background: #fafafa;
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* ── IndexedDB 説明バナー ── */
+  .storage-info {
+    color: #1a5276;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.55;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+    background: #eaf4fb;
+    border: 1.5px solid #aed6f1;
+    border-radius: 10px;
+  }
+
+  .pw-backup-primary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+    align-items: center;
+  }
+  .btn-pw-backup-main {
+    padding: 11px 18px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--primary);
+    color: #fff;
+    transition: background .15s, transform .1s;
+  }
+  .btn-pw-backup-main:hover { background: var(--primary-dk); }
+  .btn-pw-backup-main:active { transform: scale(.97); }
+  .btn-pw-restore-main {
+    display: inline-block;
+    padding: 11px 18px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: #fff;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    transition: background .15s;
+  }
+  .btn-pw-restore-main:hover { background: var(--primary-lt); }
+  #pw-backup-file { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:1.3rem">🔐</span>
+  <h1>パスワード管理</h1>
+  <span class="count-badge" id="count">0 件</span>
+</header>
+
+<div class="container">
+
+  <!-- 検索 -->
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="🔍 社名・ID・備考で検索..." oninput="render()" autocomplete="off" />
+    <button class="btn-clear-search" onclick="clearSearch()">クリア</button>
+  </div>
+
+  <!-- ストレージ説明 -->
+  <p class="storage-info">💡 データは <strong>このブラウザの IndexedDB</strong> に自動保存されます。次回起動時も自動で復元されます。ブラウザのデータ消去で失われる場合があるため、定期的に「💾 バックアップ」ボタンでJSONファイルに書き出してください。</p>
+
+  <!-- メインバックアップ -->
+  <div class="pw-backup-primary">
+    <button type="button" class="btn-pw-backup-main" onclick="downloadPasswordsBackup()">💾 バックアップ（JSON保存）</button>
+    <label class="btn-pw-restore-main" for="pw-backup-file">📂 JSONから復元</label>
+    <input type="file" id="pw-backup-file" accept="application/json,.json" onchange="restorePasswordsBackup(this)" />
+    <span style="font-size:0.76rem;color:var(--muted);">保存ファイル名：<code style="background:#eee;padding:2px 6px;border-radius:4px">passwords_backup.json</code></span>
+  </div>
+
+  <!-- バックアップ・復元バー -->
+  <div class="backup-bar">
+    <span class="bar-label">📤 エクスポート</span>
+    <div class="bar-btns">
+      <button class="btn-export json" onclick="exportJSON()">⬇ JSONで書き出し</button>
+      <button class="btn-export csv"  onclick="exportCSV()">⬇ CSVで書き出し</button>
+      <label class="btn-import-label" for="import-file">
+        ⬆ ファイルから読み込み
+        <input type="file" id="import-file" accept=".json,.csv" onchange="importFile(this)" />
+      </label>
+    </div>
+    <select class="import-mode-select" id="import-mode" title="復元時の動作">
+      <option value="merge">既存データに追加（重複スキップ）</option>
+      <option value="replace">すべて置き換える</option>
+    </select>
+  </div>
+
+  <!-- 追加フォーム -->
+  <div class="form-card">
+    <h2>➕ 新規追加</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>社名 / サービス名 ＊</label>
+        <input type="text" id="f-company" placeholder="例：株式会社〇〇" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>ID / メールアドレス ＊</label>
+        <input type="text" id="f-id" placeholder="例：user@example.com" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>パスワード ＊</label>
+        <div class="pw-wrap">
+          <input type="password" id="f-pw" placeholder="パスワードを入力" autocomplete="new-password" />
+          <button class="btn-eye" type="button" onclick="toggleEye('f-pw', this)" title="表示切替">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>備考（URL・メモなど）</label>
+        <input type="text" id="f-note" placeholder="例：https://example.com" autocomplete="off" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-add" onclick="addEntry()">保存する</button>
+      <button class="btn-reset" onclick="clearForm()">リセット</button>
+    </div>
+  </div>
+
+  <!-- リスト -->
+  <div id="list"></div>
+</div>
+
+<!-- 編集モーダル -->
+<div class="modal-overlay" id="editModal" onclick="handleOverlayClick(event)">
+  <div class="modal-box">
+    <h2>✏️ 編集</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>社名 / サービス名 ＊</label>
+        <input type="text" id="e-company" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>ID / メールアドレス ＊</label>
+        <input type="text" id="e-id" autocomplete="off" />
+      </div>
+      <div class="form-group">
+        <label>パスワード ＊</label>
+        <div class="pw-wrap">
+          <input type="password" id="e-pw" autocomplete="new-password" />
+          <button class="btn-eye" type="button" onclick="toggleEye('e-pw', this)" title="表示切替">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>備考</label>
+        <input type="text" id="e-note" autocomplete="off" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="saveEdit()">保存する</button>
+      <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   IndexedDB ストレージ
+   DB名: pw_manager_db  ストア名: entries
+══════════════════════════════════════════════ */
+const DB_NAME    = 'pw_manager_db';
+const DB_VERSION = 1;
+const STORE_NAME = 'entries';
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE_NAME)) {
+        d.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: false });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+/** IndexedDB から全件読み込み（id 降順） */
+function dbLoadAll() {
+  return new Promise((resolve, reject) => {
+    const tx    = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req   = store.getAll();
+    req.onsuccess = e => {
+      const rows = e.target.result || [];
+      rows.sort((a, b) => b.id - a.id); // 新しい順
+      resolve(rows);
+    };
+    req.onerror = e => reject(e.target.error);
+  });
+}
+
+/** IndexedDB へ 1件書き込み（put = upsert） */
+function dbPut(entry) {
+  return new Promise((resolve, reject) => {
+    const tx    = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const req   = store.put(entry);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+/** IndexedDB から 1件削除 */
+function dbDelete(id) {
+  return new Promise((resolve, reject) => {
+    const tx    = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    const req   = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+/** IndexedDB を全件クリアして配列で一括書き込み */
+function dbReplaceAll(entries) {
+  return new Promise((resolve, reject) => {
+    const tx    = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.clear();
+    entries.forEach(e => store.put(e));
+    tx.oncomplete = () => resolve();
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   アプリデータ
+══════════════════════════════════════════════ */
+let data = [];
+let editingId = null;
+
+function nextId() {
+  return data.length > 0 ? Math.max(...data.map(d => d.id)) + 1 : 1;
+}
+
+/* ── トースト ── */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ── パスワード表示切替 ── */
+function toggleEye(inputId, btn) {
+  const el = document.getElementById(inputId);
+  if (el.type === 'password') { el.type = 'text';     btn.textContent = '🙈'; }
+  else                        { el.type = 'password'; btn.textContent = '👁'; }
+}
+
+/* ── コピー ── */
+function copyText(text, btn) {
+  const origLabel = btn.textContent;
+  const done = () => {
+    btn.textContent = 'コピー済み！';
+    btn.classList.add('copied');
+    showToast('コピーしました');
+    setTimeout(() => { btn.textContent = origLabel; btn.classList.remove('copied'); }, 1800);
+  };
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    navigator.clipboard.writeText(String(text ?? '')).then(done).catch(() => fallbackCopy(String(text ?? ''), btn, origLabel));
+  } else {
+    fallbackCopy(String(text ?? ''), btn, origLabel);
+  }
+}
+
+function fallbackCopy(text, btn, origLabel) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) {
+      btn.textContent = 'コピー済み！';
+      btn.classList.add('copied');
+      showToast('コピーしました');
+      setTimeout(() => { btn.textContent = origLabel; btn.classList.remove('copied'); }, 1800);
+    } else {
+      showToast('コピーに失敗しました');
+    }
+  } catch (e) { showToast('コピーに失敗しました'); }
+}
+
+document.getElementById('list').addEventListener('click', function (e) {
+  const btn = e.target.closest('.btn-copy');
+  if (!btn || !document.getElementById('list').contains(btn)) return;
+  const id    = parseInt(btn.dataset.copyEntry, 10);
+  const field = btn.dataset.copyField;
+  if (!id || !field) return;
+  const entry = data.find(d => d.id === id);
+  if (!entry) return;
+  const text = field === 'password' ? entry.password : field === 'loginId' ? entry.loginId : '';
+  copyText(text, btn);
+});
+
+/* ── フォームクリア ── */
+function clearForm() {
+  ['f-company','f-id','f-pw','f-note'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  const pw = document.getElementById('f-pw');
+  if (pw.type === 'text') pw.type = 'password';
+  document.querySelector('#f-pw + .btn-eye').textContent = '👁';
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  render();
+}
+
+/* ── 追加 ── */
+async function addEntry() {
+  const company = document.getElementById('f-company').value.trim();
+  const id      = document.getElementById('f-id').value.trim();
+  const pw      = document.getElementById('f-pw').value.trim();
+  if (!company || !id || !pw) { showToast('⚠️ 社名・ID・パスワードは必須です'); return; }
+  const entry = {
+    id:       nextId(),
+    company,
+    loginId:  id,
+    password: pw,
+    note:     document.getElementById('f-note').value.trim(),
+    date:     new Date().toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }),
+  };
+  data.unshift(entry);
+  await dbPut(entry);
+  clearForm();
+  render();
+  showToast('✅ 保存しました');
+}
+
+/* ── 削除 ── */
+async function deleteEntry(id) {
+  if (!confirm('削除しますか？')) return;
+  data = data.filter(d => d.id !== id);
+  await dbDelete(id);
+  render();
+  showToast('🗑 削除しました');
+}
+
+/* ── 編集モーダル ── */
+function openEdit(id) {
+  const entry = data.find(d => d.id === id);
+  if (!entry) return;
+  editingId = id;
+  document.getElementById('e-company').value = entry.company;
+  document.getElementById('e-id').value      = entry.loginId;
+  document.getElementById('e-pw').value      = entry.password;
+  document.getElementById('e-note').value    = entry.note || '';
+  document.getElementById('editModal').classList.add('open');
+  setTimeout(() => document.getElementById('e-company').focus(), 80);
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('open');
+  editingId = null;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('editModal')) closeModal();
+}
+
+async function saveEdit() {
+  const entry = data.find(d => d.id === editingId);
+  if (!entry) return;
+  const company = document.getElementById('e-company').value.trim();
+  const id      = document.getElementById('e-id').value.trim();
+  const pw      = document.getElementById('e-pw').value.trim();
+  if (!company || !id || !pw) { showToast('⚠️ 社名・ID・パスワードは必須です'); return; }
+  entry.company  = company;
+  entry.loginId  = id;
+  entry.password = pw;
+  entry.note     = document.getElementById('e-note').value.trim();
+  await dbPut(entry);
+  closeModal();
+  render();
+  showToast('✅ 更新しました');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ══════════════════════════════════════════════
+   バックアップ / 復元（passwords_backup.json）
+══════════════════════════════════════════════ */
+function downloadPasswordsBackup() {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+  downloadBlob(blob, 'passwords_backup.json');
+  showToast('✅ passwords_backup.json をダウンロードしました');
+}
+
+function restorePasswordsBackup(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      let imported = JSON.parse(e.target.result);
+      imported = unwrapBackupImported(imported);
+      if (!Array.isArray(imported)) throw new Error('JSON は登録データの配列である必要があります');
+      if (!confirm(`現在の ${data.length} 件を、このファイルの ${imported.length} 件で置き換えますか？`)) {
+        input.value = '';
+        return;
+      }
+      await applyAll(imported);
+      render();
+      showToast(`✅ ${data.length} 件を復元しました`);
+    } catch (err) {
+      showToast('❌ 復元に失敗しました：' + (err.message || err));
+    }
+    input.value = '';
+  };
+  reader.onerror = () => { showToast('❌ ファイルの読み込みに失敗しました'); input.value = ''; };
+  reader.readAsText(file, 'UTF-8');
+}
+
+/* ── エクスポート（JSON） ── */
+function exportJSON() {
+  if (data.length === 0) { showToast('⚠️ データがありません'); return; }
+  downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `pw_backup_${dateStamp()}.json`);
+  showToast('✅ JSONで書き出しました');
+}
+
+/* ── エクスポート（CSV） ── */
+function exportCSV() {
+  if (data.length === 0) { showToast('⚠️ データがありません'); return; }
+  const header = ['社名/サービス名','ID/メールアドレス','パスワード','備考','登録日'];
+  const rows   = data.map(d => [d.company, d.loginId, d.password, d.note || '', d.date || ''].map(csvCell));
+  const csv    = '\uFEFF' + [header.map(csvCell), ...rows].map(r => r.join(',')).join('\r\n');
+  downloadBlob(new Blob([csv], { type: 'text/csv' }), `pw_backup_${dateStamp()}.csv`);
+  showToast('✅ CSVで書き出しました');
+}
+
+function csvCell(v) {
+  const s = String(v ?? '');
+  return (s.includes(',') || s.includes('"') || s.includes('\n'))
+    ? '"' + s.replace(/"/g, '""') + '"'
+    : s;
+}
+
+function dateStamp() {
+  const d = new Date();
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a   = Object.assign(document.createElement('a'), { href: url, download: filename });
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
+/* ── インポート（JSON / CSV） ── */
+function importFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const mode = document.getElementById('import-mode').value;
+      const ext  = file.name.split('.').pop().toLowerCase();
+      let imported = [];
+      if (ext === 'json') {
+        imported = JSON.parse(e.target.result);
+        if (!Array.isArray(imported)) throw new Error('形式が違います');
+      } else if (ext === 'csv') {
+        imported = parseCSV(e.target.result);
+      } else {
+        throw new Error('JSONまたはCSVファイルを選択してください');
+      }
+      if (imported.length === 0) { showToast('⚠️ データが空です'); return; }
+
+      if (mode === 'replace') {
+        if (!confirm(`現在の ${data.length} 件を削除し、${imported.length} 件に置き換えますか？`)) return;
+        await applyAll(imported);
+        showToast(`✅ ${data.length} 件を復元しました`);
+      } else {
+        const existingKeys = new Set(data.map(d => d.company + '|' + d.loginId));
+        let added = 0;
+        for (const d of imported) {
+          const entry = normalizeEntry(d, nextId());
+          const key   = entry.company + '|' + entry.loginId;
+          if (!existingKeys.has(key)) {
+            data.unshift(entry);
+            existingKeys.add(key);
+            await dbPut(entry);
+            added++;
+          }
+        }
+        if (added === 0) { showToast('⚠️ 追加できる新しいデータがありませんでした'); input.value = ''; return; }
+        showToast(`✅ ${added} 件を追加しました`);
+      }
+      render();
+    } catch (err) {
+      showToast('❌ 読み込みに失敗しました：' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+/* ── ヘルパー ── */
+function normalizeEntry(d, fallbackId) {
+  return {
+    id:       typeof d.id === 'number' ? d.id : fallbackId,
+    company:  d.company  || d['社名/サービス名'] || d['社名'] || '',
+    loginId:  d.loginId  || d['ID/メールアドレス'] || d['ID'] || '',
+    password: d.password || d['パスワード'] || '',
+    note:     d.note     || d['備考'] || '',
+    date:     d.date     || d['登録日'] || new Date().toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }),
+  };
+}
+
+function unwrapBackupImported(parsed) {
+  if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Array.isArray(parsed.entries)) {
+    return parsed.entries;
+  }
+  return parsed;
+}
+
+/** data を引数の配列で全置換し IndexedDB にも反映 */
+async function applyAll(imported) {
+  const normalized = imported.map((d, i) => normalizeEntry(d, i + 1));
+  normalized.forEach((e, i) => { e.id = i + 1; });
+  await dbReplaceAll(normalized);
+  data = normalized.slice().sort((a, b) => b.id - a.id);
+}
+
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  if (lines.length < 2) return [];
+  const headers = splitCSVLine(lines[0]);
+  return lines.slice(1).filter(l => l.trim()).map(line => {
+    const cells = splitCSVLine(line);
+    const obj   = {};
+    headers.forEach((h, i) => { obj[h.trim()] = (cells[i] || '').trim(); });
+    return obj;
+  });
+}
+
+function splitCSVLine(line) {
+  const result = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ;
+    } else if (ch === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += ch; }
+  }
+  result.push(cur);
+  return result;
+}
+
+/* ── エスケープ ── */
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── レンダリング ── */
+function render() {
+  const q = (document.getElementById('search-input').value || '').toLowerCase().trim();
+  const filtered = q
+    ? data.filter(d =>
+        (d.company  || '').toLowerCase().includes(q) ||
+        (d.loginId  || '').toLowerCase().includes(q) ||
+        (d.note     || '').toLowerCase().includes(q)
+      )
+    : data;
+
+  document.getElementById('count').textContent = filtered.length + ' 件';
+  const list = document.getElementById('list');
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty">${q ? '該当するデータがありません' : 'まだデータがありません。上のフォームから追加してください。'}</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(d => `
+    <div class="item-card">
+      <div class="card-head">
+        <span class="card-company">${esc(d.company)}</span>
+        <span style="font-size:0.68rem;color:#ccc;margin-left:auto;white-space:nowrap">${d.date || ''}</span>
+        <button class="btn-icon" onclick="openEdit(${d.id})" title="編集">✏️</button>
+        <button class="btn-icon del" onclick="deleteEntry(${d.id})" title="削除">✕</button>
+      </div>
+      <div class="card-body">
+        <div class="card-field">
+          <span class="field-label">ID</span>
+          <span class="field-value">${esc(d.loginId)}</span>
+          <button type="button" class="btn-copy" data-copy-entry="${d.id}" data-copy-field="loginId">コピー</button>
+        </div>
+        <div class="card-field">
+          <span class="field-label">パスワード</span>
+          <span class="field-value pw masked" title="クリックで表示">${esc(d.password)}</span>
+          <button type="button" class="btn-copy" data-copy-entry="${d.id}" data-copy-field="password">コピー</button>
+        </div>
+        ${d.note ? `
+        <div class="card-field">
+          <span class="field-label">備考</span>
+          <span class="field-value field-note">${esc(d.note)}</span>
+        </div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ══════════════════════════════════════════════
+   起動処理
+   1. IndexedDB を開く
+   2. 全件読み込んで表示
+   ※ LocalStorage は使用しない
+══════════════════════════════════════════════ */
+(async function bootstrap() {
+  try {
+    db   = await openDB();
+    data = await dbLoadAll();
+  } catch (e) {
+    showToast('⚠️ IndexedDB の初期化に失敗しました：' + e.message);
+    data = [];
+  }
+  render();
+})();
+</script>
+</body>
+</html>

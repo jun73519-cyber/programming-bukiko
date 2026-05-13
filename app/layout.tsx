@@ -12,8 +12,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "採用管理ワークスペース",
-  description: "tweakcn テーマ + 日本語タイポ検証用プロトタイプ",
+  title: "プログラミング武器庫",
+  description: "自作ツールを管理・閲覧するためのワークスペース",
 };
 
 export const viewport: Viewport = {
@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={`${inter.variable} h-full antialiased`}>
+    <html lang="ja" className={`${inter.variable} dark h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         {/* shadcn/ui の Sidebar コンポーネント（SidebarMenuButton の collapsed
             時 tooltip 等）が要求するためアプリ全体をラップする。 */}
