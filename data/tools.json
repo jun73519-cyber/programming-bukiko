@@ -77,7 +77,7 @@
           "execInfo": [
             { "label": "コンセプト", "value": "リピート厳選" },
             { "label": "データ源",   "value": "YouTube" },
-            { "label": "作業場所",   "value": "ローカル環境 (IndexedDB)" },
+            { "label": "作業場所",   "value": "クラウド (Supabase)" },
             { "label": "ステータス", "value": "稼働中 (常時更新)" }
           ]
         },
