@@ -84,14 +84,15 @@
         {
           "id": "osusume-list",
           "name": "おすすめリスト",
-          "description": "おすすめされたお店や本をまとめたパーソナルリスト。スマホアプリとしても運用しており、外出先でも即座にチェック可能。",
-          "tags": ["パーソナル", "まとめ"],
+          "description": "おすすめされたお店や本をまとめたパーソナルリスト。本のギャラリー（読了・評価・感想）と飲食店リストを Google スプレッドシート経由でクラウド同期。PC / スマホ（PWA）で使える。",
+          "tags": ["パーソナル", "まとめ", "PWA"],
           "status": "active",
-          "url": "https://astounding-parfait-a0a052.netlify.app/%E3%81%8A%E3%81%99%E3%81%99%E3%82%81%E3%83%AA%E3%82%B9%E3%83%88.html",
+          "url": "https://osusume-list.vercel.app/",
           "execInfo": [
             { "label": "コンセプト", "value": "人からおすすめされた飲食店や本" },
-            { "label": "データ源",   "value": "Netlify (クラウド管理)" },
-            { "label": "利用形態",   "value": "PC / スマホアプリ完全同期" },
+            { "label": "データ源",   "value": "Google スプレッドシート（GAS 同期）" },
+            { "label": "ホスティング", "value": "Vercel + GitHub（push で自動デプロイ）" },
+            { "label": "利用形態",   "value": "PC / スマホアプリ（PWA）完全同期" },
             { "label": "ステータス", "value": "稼働中" }
           ]
         },
