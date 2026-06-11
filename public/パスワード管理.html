@@ -205,6 +205,8 @@
   }
   .btn-icon:hover { color: var(--gold); background: #fdf5e8; }
   .btn-icon.del:hover { color: var(--red); background: var(--red-lt); }
+  .btn-icon.pin { font-size: 1.05rem; }
+  .btn-icon.pin.pinned { color: var(--gold); }
 
   .card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
 
@@ -592,6 +594,17 @@ function dbPut(entry) {
   });
 }
 
+/** IndexedDB へ複数件を1つのトランザクションでまとめて書き込み */
+function dbPutMany(entries) {
+  return new Promise((resolve, reject) => {
+    const tx    = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    entries.forEach(e => store.put(e));
+    tx.oncomplete = () => resolve();
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
 /** IndexedDB から 1件削除 */
 function dbDelete(id) {
   return new Promise((resolve, reject) => {
@@ -719,9 +732,15 @@ async function addEntry() {
     password: pw,
     note:     document.getElementById('f-note').value.trim(),
     date:     new Date().toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }),
+    pinned:   false,
   };
+  try {
+    await dbPut(entry);
+  } catch (err) {
+    showToast('❌ 保存に失敗しました：' + (err.message || err));
+    return;
+  }
   data.unshift(entry);
-  await dbPut(entry);
   clearForm();
   render();
   showToast('✅ 保存しました');
@@ -730,8 +749,13 @@ async function addEntry() {
 /* ── 削除 ── */
 async function deleteEntry(id) {
   if (!confirm('削除しますか？')) return;
+  try {
+    await dbDelete(id);
+  } catch (err) {
+    showToast('❌ 削除に失敗しました：' + (err.message || err));
+    return;
+  }
   data = data.filter(d => d.id !== id);
-  await dbDelete(id);
   render();
   showToast('🗑 削除しました');
 }
@@ -765,17 +789,42 @@ async function saveEdit() {
   const id      = document.getElementById('e-id').value.trim();
   const pw      = document.getElementById('e-pw').value.trim();
   if (!company || !id || !pw) { showToast('⚠️ 社名・ID・パスワードは必須です'); return; }
-  entry.company  = company;
-  entry.loginId  = id;
-  entry.password = pw;
-  entry.note     = document.getElementById('e-note').value.trim();
-  await dbPut(entry);
+  const updated = {
+    ...entry,
+    company,
+    loginId:  id,
+    password: pw,
+    note:     document.getElementById('e-note').value.trim(),
+  };
+  try {
+    await dbPut(updated);
+  } catch (err) {
+    showToast('❌ 更新に失敗しました：' + (err.message || err));
+    return;
+  }
+  Object.assign(entry, updated);
   closeModal();
   render();
   showToast('✅ 更新しました');
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ── ピン留め ── */
+async function togglePin(id) {
+  const entry = data.find(d => d.id === id);
+  if (!entry) return;
+  const updated = { ...entry, pinned: !entry.pinned };
+  try {
+    await dbPut(updated);
+  } catch (err) {
+    showToast('❌ 保存に失敗しました：' + (err.message || err));
+    return;
+  }
+  entry.pinned = updated.pinned;
+  render();
+  showToast(entry.pinned ? '📌 ピン留めしました（常に上に表示されます）' : 'ピン留めを解除しました');
+}
 
 /* ══════════════════════════════════════════════
    バックアップ / 復元（passwords_backup.json）
@@ -875,19 +924,22 @@ function importFile(input) {
         showToast(`✅ ${data.length} 件を復元しました`);
       } else {
         const existingKeys = new Set(data.map(d => d.company + '|' + d.loginId));
-        let added = 0;
+        const newEntries = [];
+        let newId = nextId();
         for (const d of imported) {
-          const entry = normalizeEntry(d, nextId());
-          const key   = entry.company + '|' + entry.loginId;
+          const entry = normalizeEntry(d, newId);
+          entry.id = newId; // 既存IDとの衝突を防ぐため、常に新しいIDを振り直す
+          const key = entry.company + '|' + entry.loginId;
           if (!existingKeys.has(key)) {
-            data.unshift(entry);
+            newEntries.push(entry);
             existingKeys.add(key);
-            await dbPut(entry);
-            added++;
+            newId++;
           }
         }
-        if (added === 0) { showToast('⚠️ 追加できる新しいデータがありませんでした'); input.value = ''; return; }
-        showToast(`✅ ${added} 件を追加しました`);
+        if (newEntries.length === 0) { showToast('⚠️ 追加できる新しいデータがありませんでした'); input.value = ''; return; }
+        await dbPutMany(newEntries);
+        newEntries.forEach(entry => data.unshift(entry));
+        showToast(`✅ ${newEntries.length} 件を追加しました`);
       }
       render();
     } catch (err) {
@@ -895,6 +947,7 @@ function importFile(input) {
     }
     input.value = '';
   };
+  reader.onerror = () => { showToast('❌ ファイルの読み込みに失敗しました'); input.value = ''; };
   reader.readAsText(file, 'UTF-8');
 }
 
@@ -907,6 +960,7 @@ function normalizeEntry(d, fallbackId) {
     password: d.password || d['パスワード'] || '',
     note:     d.note     || d['備考'] || '',
     date:     d.date     || d['登録日'] || new Date().toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }),
+    pinned:   d.pinned === true,
   };
 }
 
@@ -967,19 +1021,28 @@ function render() {
       )
     : data;
 
-  document.getElementById('count').textContent = filtered.length + ' 件';
+  // ピン留めを上に、その中では新しい順
+  const sorted = filtered.slice().sort((a, b) =>
+    ((b.pinned ? 1 : 0) - (a.pinned ? 1 : 0)) || (b.id - a.id)
+  );
+
+  // 検索結果が1件だけならパスワードのぼかしを自動解除
+  const autoReveal = q && sorted.length === 1;
+
+  document.getElementById('count').textContent = sorted.length + ' 件';
   const list = document.getElementById('list');
 
-  if (filtered.length === 0) {
+  if (sorted.length === 0) {
     list.innerHTML = `<div class="empty">${q ? '該当するデータがありません' : 'まだデータがありません。上のフォームから追加してください。'}</div>`;
     return;
   }
 
-  list.innerHTML = filtered.map(d => `
+  list.innerHTML = sorted.map(d => `
     <div class="item-card">
       <div class="card-head">
         <span class="card-company">${esc(d.company)}</span>
-        <span style="font-size:0.68rem;color:#ccc;margin-left:auto;white-space:nowrap">${d.date || ''}</span>
+        <span style="font-size:0.68rem;color:#ccc;margin-left:auto;white-space:nowrap">${esc(d.date || '')}</span>
+        <button class="btn-icon pin ${d.pinned ? 'pinned' : ''}" onclick="togglePin(${d.id})" title="${d.pinned ? 'ピン留め解除' : 'ピン留め（常に上に表示）'}">${d.pinned ? '★' : '☆'}</button>
         <button class="btn-icon" onclick="openEdit(${d.id})" title="編集">✏️</button>
         <button class="btn-icon del" onclick="deleteEntry(${d.id})" title="削除">✕</button>
       </div>
@@ -991,7 +1054,7 @@ function render() {
         </div>
         <div class="card-field">
           <span class="field-label">パスワード</span>
-          <span class="field-value pw masked" title="クリックで表示">${esc(d.password)}</span>
+          <span class="field-value pw ${autoReveal ? '' : 'masked'}" title="${autoReveal ? '' : 'マウスを乗せると表示'}">${esc(d.password)}</span>
           <button type="button" class="btn-copy" data-copy-entry="${d.id}" data-copy-field="password">コピー</button>
         </div>
         ${d.note ? `
@@ -1019,6 +1082,8 @@ function render() {
     data = [];
   }
   render();
+  // 開いたらすぐ検索できるようにカーソルを検索ボックスへ
+  document.getElementById('search-input').focus();
 })();
 </script>
 </body>
