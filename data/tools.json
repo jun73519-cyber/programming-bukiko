@@ -139,6 +139,21 @@
             { "label": "届け先", "value": "LINE" },
             { "label": "ハマりどころ", "value": "キーは const ではなく関数内で getProperty 直読み／変更後は要デプロイ更新" }
           ]
+        },
+        {
+          "id": "kansoubun-formatter",
+          "name": "感想文フォーマッター",
+          "description": "メモや音声入力の文字起こしを AI が整形。読書感想文は SAKURA+ フォームと note へ、映画レビューは note と映画.com へ投稿できる文章を一括生成。アイキャッチ画像の note サイズ整形機能つき。",
+          "tags": ["Claude API", "React", "note", "読書", "映画"],
+          "status": "active",
+          "execInfo": [
+            { "label": "トリガー", "value": "手動実行（Artifact）" },
+            { "label": "ソース元", "value": "メモアプリ / 音声入力" },
+            { "label": "作業場所", "value": "Claude Artifact（React）" },
+            { "label": "届け先", "value": "SAKURA+フォーム / note / 映画.com" },
+            { "label": "API", "value": "Claude API（claude-sonnet-4）" },
+            { "label": "モード", "value": "読書（SAKURA+＋note）／映画（note＋映画.com）" }
+          ]
         }
       ]
     },
