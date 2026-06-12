@@ -123,6 +123,22 @@
             { "label": "作業場所", "value": "Google Apps Script" },
             { "label": "届け先", "value": "LINE" }
           ]
+        },
+        {
+          "id": "fridge-recipe-line-bot",
+          "name": "冷蔵庫の余り物 献立提案LINE Bot",
+          "description": "冷蔵庫の余り食材を LINE で送ると、Gemini が「使い切る」献立を2案、見やすい整形で提案してくれる Bot。食材を無駄にせず使い切るのが目的。LINE Messaging API + GAS + Gemini API 構成。",
+          "tags": ["LINE", "Gemini", "GAS", "自動化", "料理"],
+          "status": "active",
+          "url": "https://script.google.com/home/projects/1OKdJaU5RYKrAsHrS_5H5zLLW69ao3mblyiuq2BLdfyikAOnpBdm_5k4n/edit",
+          "execInfo": [
+            { "label": "トリガー", "value": "LINE メッセージ受信時（Webhook / doPost）" },
+            { "label": "ソース元", "value": "ユーザーが送る余り食材（スペース／改行区切りのテキスト）" },
+            { "label": "処理", "value": "Gemini（gemini-2.5-flash）で使い切り献立を生成・整形" },
+            { "label": "作業場所", "value": "Google Apps Script" },
+            { "label": "届け先", "value": "LINE" },
+            { "label": "ハマりどころ", "value": "キーは const ではなく関数内で getProperty 直読み／変更後は要デプロイ更新" }
+          ]
         }
       ]
     },
