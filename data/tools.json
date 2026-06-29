@@ -157,6 +157,20 @@
           ]
         },
         {
+          "id": "karate-dojo-attendance",
+          "name": "空手道場 出席・昇級管理",
+          "description": "道場の生徒の出席をワンタップで記録し、級・段ごとの必要稽古回数・試合数から昇級可能者を自動判定。スプレッドシート貼り付けで一括登録、審査日リセット、期間集計、バックアップ書き出しに対応。",
+          "tags": ["空手", "出席管理", "React", "個人開発"],
+          "status": "active",
+          "execInfo": [
+            { "label": "技術", "value": "React（Claude Artifact）" },
+            { "label": "データ保存", "value": "Claude の window.storage（本人のみ・端末間同期）" },
+            { "label": "ソース控え", "value": "programming-bukiko/tool-sources/karate-dojo/App.jsx" },
+            { "label": "実行", "value": "Claude のチャットで Artifact として開く（外では window.storage 差し替えが必要）" },
+            { "label": "バックアップ", "value": "アプリ内「バックアップをコピー」でテキスト書き出し" }
+          ]
+        },
+        {
           "id": "kansoubun-formatter",
           "name": "感想文フォーマッター",
           "description": "メモや音声入力の文字起こしを AI が整形。読書感想文は SAKURA+ フォームと note へ、映画レビューは note と映画.com へ投稿できる文章を一括生成。アイキャッチ画像の note サイズ整形機能つき。",
