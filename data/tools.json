@@ -146,12 +146,13 @@
           "description": "自分専用のゲーミフィケーション家事管理アプリ。インターバル（経過日数）を過ぎたタスクだけがガチャで出現し、こなすと「エネルギー」がEXPとして貯まってレベルと称号が上がる。PWA対応でスマホのホーム画面からネイティブアプリのように全画面起動できる。",
           "tags": ["家事", "ゲーミフィケーション", "PWA", "Tailwind", "個人開発"],
           "status": "active",
-          "url": "https://github.com/jun73519-cyber/kaji-master",
+          "url": "https://jun73519-cyber.github.io/kaji-master/",
           "execInfo": [
-            { "label": "コンセプト", "value": "インターバル付きランダムタスク（ガチャ）＋家事の達人度（EXP/レベル/称号）" },
+            { "label": "コンセプト", "value": "インターバル付きランダムタスク（ガチャ）＋家事の達人度（EXP/レベル/称号）＋実績バッジ・連続達成ストリーク" },
             { "label": "技術", "value": "HTML / Tailwind CSS / PWA（単一 index.html 構成）" },
             { "label": "同期の流れ", "value": "Windows(会社) ⇄ GitHub ⇄ Mac(自宅) ⇄ スマホ" },
             { "label": "ホスティング", "value": "GitHub Pages（kaji-master リポジトリ）" },
+            { "label": "ソースコード", "value": "https://github.com/jun73519-cyber/kaji-master" },
             { "label": "利用形態", "value": "スマホ（PWA・ホーム画面から全画面起動）/ PC" },
             { "label": "ステータス", "value": "稼働中" }
           ]
