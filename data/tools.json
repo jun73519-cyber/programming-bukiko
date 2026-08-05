@@ -162,16 +162,19 @@
         },
         {
           "id": "google-fit-line-diet-report",
-          "name": "Google Fit × LINE ダイエットレポート",
-          "description": "Google Fit から歩数・体重を自動取得して LINE に Flex Message で毎日送信。週1で別ユーザーにも送信可能。",
-          "tags": ["Google Fit", "LINE", "自動化", "健康"],
+          "name": "Garmin × LINE ダイエットレポート",
+          "description": "Garmin Connect から体重・消費カロリー・歩数を毎日自動取得してGoogleスプレッドシートに記録し、けんと式AIアドバイザーの分析付きレポートを LINE に Flex Message で毎日送信。週1で別ユーザーにも送信可能。",
+          "tags": ["Garmin", "LINE", "自動化", "健康"],
           "status": "active",
           "url": "https://script.google.com/home/projects/1Nf-tTafSAHTDMtRx5L3C6xYy-sFqZwN2ZYtn2xpT4EZgMY4_aNyeaVgG/edit",
           "execInfo": [
-            { "label": "トリガー", "value": "スケジュール実行（毎日16時半 / 毎週月曜）" },
-            { "label": "ソース元", "value": "Google Fit API" },
-            { "label": "作業場所", "value": "Google Apps Script" },
-            { "label": "届け先", "value": "LINE" }
+            { "label": "トリガー", "value": "スケジュール実行（毎日0:35データ取得 / 毎日16時半 LINE送信 / 毎週月曜別ユーザー）" },
+            { "label": "ソース元", "value": "Garmin Connect（garminconnectライブラリ経由）" },
+            { "label": "作業場所", "value": "GitHub Actions（データ取得）+ Google Apps Script（LINE送信）" },
+            { "label": "届け先", "value": "LINE" },
+            { "label": "データ取得リポジトリ", "value": "https://github.com/jun73519-cyber/diet-garmin-sync（private）" },
+            { "label": "LINE送信", "value": "既存 GAS の pushFlexDietReport（変更なし）" },
+            { "label": "移行理由", "value": "Google Fit API が 2026 年末終了のため Garmin Connect へ移行" }
           ]
         },
         {
@@ -357,6 +360,23 @@
             { "label": "進め方", "value": "道A（踏襲ルート）で改造／道B（自由ルート）でゼロから の 2 通り" },
             { "label": "備考", "value": "この武器庫アプリ自体もこのひな形から派生" },
             { "label": "詳細", "value": "リポジトリ直下 README.md" }
+          ]
+        },
+        {
+          "id": "learning-writing-presentations",
+          "name": "writing-presentations（発表原稿スキル）",
+          "description": "通したい企画や発表を、会議・プレゼンなど「尺のある場」で通す読み上げ原稿を作る Claude スキル。対話で本人の中にある具体（場面・心の声・弱さ・原体験）を1問ずつ引き出し、結論ファーストのまま「問いを開いて、絵で閉じる」6ステップ構成に仕上げる。",
+          "tags": ["スキル", "プレゼン", "発表", "Claude", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/.claude/skills/writing-presentations",
+          "execInfo": [
+            { "label": "本体", "value": "SKILL.md（writing-presentations）" },
+            { "label": "場所", "value": "C:\\Users\\nozoe.HYPERGEAR\\.claude\\skills\\writing-presentations\\" },
+            { "label": "起動", "value": "Cursor / Claude で「プレゼンを作って」「発表原稿を書いて」「writing-presentations」などと依頼" },
+            { "label": "前提", "value": "結論と中身が固まった元原稿があること。提案文書が未作成なら先に writing-proposals" },
+            { "label": "進め方", "value": "元原稿を受け取る → 足りない具体を1問ずつ掘る → 6ステップ読み上げ原稿を Markdown で出力 → 品質チェック" },
+            { "label": "構成", "value": "フック → 結論 → なぜ（絵） → どうやって → どうなる（絵） → クロージング" },
+            { "label": "原則", "value": "説明するな、体験させろ。エピソードはユーザーが語った事実のみ（AIが創作しない）" }
           ]
         }
       ]
