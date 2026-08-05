@@ -3,6 +3,8 @@
     {
       "id": "work",
       "label": "仕事用",
+      "defaultVisibility": "summary",
+      "defaultOrigin": "self",
       "tools": [
         {
           "id": "work-order",
@@ -14,24 +16,30 @@
         },
         {
           "id": "password-manager",
-          "name": "パスワード管理",
-          "description": "社名・ID・パスワードをブラウザの IndexedDB に保存し、検索・バックアップ（JSON）・復元ができる単体 HTML ツール。",
-          "tags": ["セキュリティ", "業務"],
+          "name": "パスワード管理ツール",
+          "description": "取引先ごとのPDF開封パスワードなどを社名で素早く検索できる単一HTMLツール。v2でデザイン一新・自動保存・キーボード操作に対応。",
+          "tags": ["業務効率化", "パスワード管理", "HTML", "IndexedDB", "営業事務"],
           "status": "active",
-          "url": "/パスワード管理.html",
+          "url": "/local-static/password-manager.html",
           "execInfo": [
-            { "label": "データ保存", "value": "このブラウザの IndexedDB" },
-            { "label": "バックアップ", "value": "JSON ファイルの書き出し／ファイルから復元" },
-            { "label": "同梱バックアップ例", "value": "サイト直下の passwords_backup (5).json（ブラウザで開くか、復元時にファイル選択）" }
+            { "label": "本体", "value": "password-manager.html（単一HTMLファイル、依存なし）" },
+            { "label": "場所", "value": "src\\my-projects\\programming-bukiko-local-static\\（git外・ローカル専用）" },
+            { "label": "起動", "value": "武器庫の「ツールを起動」（/local-static/…）または Live Server" },
+            { "label": "技術", "value": "HTML / CSS / JavaScript（単一ファイル）、IndexedDB（データ保存）、File System Access API（自動保存）" },
+            { "label": "データ保存", "value": "ブラウザのIndexedDBに保存され次回起動時に自動復元。自動保存を設定すると追加・編集のたびに passwords_backup.json へ自動上書き（OneDrive配下ならクラウド同期も自動）" },
+            { "label": "主な機能（v2）", "value": "検索主体のUI（起動時に検索ボックスへ自動フォーカス）／★ピン留めで常に上位表示／検索1件時のパスワード自動表示／目アイコンで表示切替／↑↓+Enterでパスワードコピー（キーボードのみで完結）／コピー30秒後にクリップボード自動消去／ダークモード自動対応／JSON・CSVの手動バックアップ・復元" },
+            { "label": "前提", "value": "Chrome推奨（File System Access API使用）。Cursor拡張機能 Live Server（ritwickdey.LiveServer）が必要" },
+            { "label": "注意", "value": "パスワードは平文保存のため、漏洩しても影響のないパスワード（PDF開封用など）専用。ブラウザの「サイトデータを消去」でIndexedDBが消えるため自動保存の設定を推奨" },
+            { "label": "バージョン", "value": "v2（2026-07-24 更新：デザイン一新・自動保存・キーボード操作・クリップボード自動消去を追加）" }
           ]
         },
         {
           "id": "fax-template",
           "name": "送り状フォーマット",
-          "description": "FAX 送り状用のレイアウトをブラウザで表示・印刷できる単体 HTML。社ロゴはサイト直下の画像を参照。",
+          "description": "FAX 送り状用のレイアウトをブラウザで表示・印刷できる単体 HTML。社ロゴは同フォルダの hg_logo.jpg を参照。",
           "tags": ["送り状", "FAX", "業務"],
           "status": "active",
-          "url": "/fax-template.html"
+          "url": "/local-static/fax-template.html"
         },
         {
           "id": "reply-templates",
@@ -39,11 +47,11 @@
           "description": "メール返信用の定型文をブラウザの IndexedDB に保存。タイトル検索、{{変数名}} の置換プレビュー、本文コピー、reply_backup.json のバックアップ／一括復元ができる単体 HTML。",
           "tags": ["メール", "定型文", "業務"],
           "status": "active",
-          "url": "/reply_assistant.html",
+          "url": "/local-static/reply_assistant.html",
           "execInfo": [
             { "label": "データ保存", "value": "このブラウザの IndexedDB（replyAssistantDB / templates）" },
             { "label": "バックアップ", "value": "reply_backup.json のダウンロード／JSON ファイルからインポート（置換）" },
-            { "label": "静的ファイル", "value": "武器庫の public 配下（/reply_assistant.html）" }
+            { "label": "静的ファイル", "value": "programming-bukiko-local-static\\（git外）。武器庫経由は /local-static/…" }
           ]
         },
         {
@@ -60,12 +68,54 @@
             { "label": "起動経路", "value": "run_report.bat → Python（stdout/stderr を log.txt に追記）" },
             { "label": "メール", "value": "thunderbird.exe -compose（宛先・件名・本文を引数で渡す）" }
           ]
+        },
+        {
+          "id": "match-quotes",
+          "name": "見積番号マッチングツール",
+          "description": "注文書PDFから見積番号を抜き出し、社内の見積書フォルダから該当ファイルを自動で探して CSV 対応表＋コピー集約するツール。OCR 由来の表記ゆれ（先頭英字欠け・途中空白・枝番・全角半角・ダッシュ違い）を自動吸収し、別メールの eml/txt からも番号を拾える。",
+          "tags": ["業務自動化", "PDF", "Python", "見積書", "営業事務"],
+          "status": "active",
+          "url": "file:///N:/nozoe/大量添付印刷用/添付ファイル",
+          "execInfo": [
+            { "label": "本体", "value": "N:\\nozoe\\大量添付印刷用\\添付ファイル\\match_quotes.py" },
+            { "label": "起動", "value": "同フォルダの 実行.bat（ダブルクリック）※デスクトップの実行.batとは別物" },
+            { "label": "技術", "value": "Python / PyMuPDF (fitz) / 正規表現 / bat ランチャー" },
+            { "label": "入力", "value": "注文書PDF ／ 別メールの eml・txt（番号メモ）" },
+            { "label": "出力", "value": "照合結果.csv（対応表）＋ 該当見積書フォルダ（コピー集約）" },
+            { "label": "検索先", "value": "\\\\192.168.1.14\\証憑保存\\営業\\2025（月別フォルダを自動再帰）" },
+            { "label": "使い方", "value": "①PDF等を添付フォルダに入れる ②実行.bat をダブルクリック（v6以降を確認）③照合結果.csv と該当見積書フォルダを確認" },
+            { "label": "前提", "value": "pip install pymupdf（初回のみ）／見積書のファイル名に見積番号が含まれること／社内ネットワーク接続" },
+            { "label": "注意", "value": "該当見積書フォルダは毎回入れ替え（原本は不変）／年が変わったら QUOTE_DIR を更新／画像のみPDFは OCR 要と表示" },
+            { "label": "関連ドキュメント", "value": "Obsidian「大量PDF添付ファイル 一括処理手順書（印刷＋見積書マッチング）」" },
+            { "label": "バージョン", "value": "v6（2026-06-25 作成 / 2026-07-22 eml・txt対応）" }
+          ]
+        },
+        {
+          "id": "license-ledger",
+          "name": "ライセンス台帳",
+          "description": "テスト用シリアル番号・コードワードを社内共有する単一HTMLツール。表形式表示・ワンクリックコピー・重複検知・編集モード・SharePoint配布用の閲覧専用書き出しまでを1ファイルで完結させる。",
+          "tags": ["ライセンス管理", "HTML", "SharePoint", "営業事務", "業務効率化"],
+          "status": "active",
+          "url": "/local-static/license-ledger-master.html",
+          "execInfo": [
+            { "label": "本体", "value": "単一HTML（データ埋め込み型・外部通信なし）。編集用マスターと閲覧用（locked）を保存ボタンで出し分け" },
+            { "label": "場所（マスター）", "value": "OneDrive\\社内共有 - 社内専用\\テスト用コードワード\\ライセンス台帳_マスター.html" },
+            { "label": "配布先", "value": "SharePoint hg_grp_share > Shared Documents > 社内専用 > テスト用コードワード（閲覧用HTMLを上書き置き換え）" },
+            { "label": "起動", "value": "武器庫の「ツールを起動」（/local-static/license-ledger-master.html）または SharePoint / ローカルの HTML を直接開く" },
+            { "label": "利用者", "value": "営業（閲覧）／野添・城田（編集）。マスターは2名限定" },
+            { "label": "主な機能", "value": "表表示・検索・クリックコピー（朱印）・3点コピー・重複ハイライト・期限切れ警告・編集モード・旧テキスト一括取り込み・配布用HTML保存" },
+            { "label": "毎月の運用", "value": "マスター編集 → マスター保存 → 配布用HTML保存 → SharePointへ既存ファイルを置き換え（削除禁止） → Thunderbirdテンプレートで案内メール" },
+            { "label": "注意", "value": "SharePointは削除→再アップロードだとリンク切れ。必ず上書き置き換え。旧テキストはShift-JIS。同時編集は一声かける運用" },
+            { "label": "バージョン", "value": "v1（2026-08 作成：SharePoint配布・閲覧専用・3点コピーまで到達）" }
+          ]
         }
       ]
     },
     {
       "id": "private",
       "label": "プライベート",
+      "defaultVisibility": "public",
+      "defaultOrigin": "self",
       "tools": [
         {
           "id": "ryuji-recipe",
@@ -127,17 +177,20 @@
         {
           "id": "fridge-recipe-line-bot",
           "name": "冷蔵庫の余り物 献立提案LINE Bot",
-          "description": "冷蔵庫の余り食材を LINE で送ると、Gemini が「使い切る」献立を2案、見やすい整形で提案してくれる Bot。食材を無駄にせず使い切るのが目的。LINE Messaging API + GAS + Gemini API 構成。",
+          "description": "冷蔵庫の余り食材を LINE で送ると、有名料理研究家（笠原将弘・長谷川あかり・コウケンテツ・だれウマ・タサン志麻・山本ゆり）の実在する公開レシピを Google 検索グラウンディングで探して2〜3件紹介する Bot。本文は転載せず、確実に開ける検索リンクで本家ページへ誘導する（v3）。",
           "tags": ["LINE", "Gemini", "GAS", "自動化", "料理"],
           "status": "active",
           "url": "https://script.google.com/home/projects/1OKdJaU5RYKrAsHrS_5H5zLLW69ao3mblyiuq2BLdfyikAOnpBdm_5k4n/edit",
           "execInfo": [
             { "label": "トリガー", "value": "LINE メッセージ受信時（Webhook / doPost）" },
             { "label": "ソース元", "value": "ユーザーが送る余り食材（スペース／改行区切りのテキスト）" },
-            { "label": "処理", "value": "Gemini（gemini-2.5-flash）で使い切り献立を生成・整形" },
+            { "label": "処理", "value": "Gemini（gemini-2.5-flash）＋ Google 検索グラウンディング（tools: google_search）で実在レシピを検索・紹介" },
+            { "label": "リンク方式", "value": "AI に URL を書かせず「けんさく|研究家名 料理名 レシピ」行をコード側で google.com/search?q=（encodeURIComponent）の検索リンクに変換" },
             { "label": "作業場所", "value": "Google Apps Script" },
             { "label": "届け先", "value": "LINE" },
-            { "label": "ハマりどころ", "value": "キーは const ではなく関数内で getProperty 直読み／変更後は要デプロイ更新" }
+            { "label": "著作権配慮", "value": "分量・手順は転載せず一言説明のみ。本家ページへリンク誘導する方式" },
+            { "label": "ハマりどころ", "value": "AI が返す直リンクは切れる（リダイレクトURL不安定・動画削除等）→ 検索リンクを自前生成が堅牢。キーは関数内で getProperty 直読み／変更後は要デプロイ更新" },
+            { "label": "バージョン", "value": "v3（生成方式 → 実在レシピ検索＋リンク紹介方式に転換）" }
           ]
         },
         {
@@ -191,6 +244,8 @@
     {
       "id": "learning",
       "label": "学習用",
+      "defaultVisibility": "public",
+      "defaultOrigin": "material",
       "tools": [
         {
           "id": "learning-ai-news",

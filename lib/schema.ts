@@ -226,6 +226,14 @@ export type Group =
 export const toolStatusSchema = z.enum(["active", "wip"]);
 export type ToolStatus = z.infer<typeof toolStatusSchema>;
 
+/** 公開サイトでの見せ方。summary は名前・説明・タグ中心（url/execInfo は公開配信から除外） */
+export const toolVisibilitySchema = z.enum(["public", "summary"]);
+export type ToolVisibility = z.infer<typeof toolVisibilitySchema>;
+
+/** self=自作 / material=スクール教材（公開ビルドから除外） */
+export const toolOriginSchema = z.enum(["self", "material"]);
+export type ToolOrigin = z.infer<typeof toolOriginSchema>;
+
 /** 実行情報の1行。任意のラベルと値のペア。 */
 export const execInfoItemSchema = z.object({
   label: z.string(),
@@ -239,6 +247,10 @@ export const toolSchema = z.object({
   description: z.string(),
   tags: z.array(z.string()),
   status: toolStatusSchema,
+  /** 省略時はカテゴリの defaultVisibility、それも無ければ public */
+  visibility: toolVisibilitySchema.optional(),
+  /** 省略時はカテゴリの defaultOrigin、それも無ければ self */
+  origin: toolOriginSchema.optional(),
   /** http(s):// 外部 URL または file:// ローカルパスを受け付ける */
   url: z.string().optional(),
   /** カスタムラベルで実行情報を定義する汎用フィールド */
@@ -249,6 +261,10 @@ export type Tool = z.infer<typeof toolSchema>;
 export const toolCategorySchema = z.object({
   id: z.string(),
   label: z.string(),
+  /** 配下ツールの visibility 省略時に使う */
+  defaultVisibility: toolVisibilitySchema.optional(),
+  /** 配下ツールの origin 省略時に使う */
+  defaultOrigin: toolOriginSchema.optional(),
   tools: z.array(toolSchema),
 });
 export type ToolCategory = z.infer<typeof toolCategorySchema>;

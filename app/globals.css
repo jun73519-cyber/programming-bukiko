@@ -409,3 +409,35 @@
   backdrop-filter: blur(2px);
   padding: 1.5rem 2rem;
 }
+
+/* Pane3 操作フッター — 長文スクロール時もボタンを常に表示 */
+.pane3-actions {
+  background: oklch(0 0 0 / 0.55);
+  border-top: 1px solid oklch(0.85 0.2 196 / 0.45);
+  box-shadow: 0 -8px 24px oklch(0 0 0 / 0.45), 0 0 16px oklch(0.85 0.2 196 / 0.12);
+  backdrop-filter: blur(4px);
+}
+
+/* Pane2 / Pane3 境界 — ドラッグリサイズ */
+.arsenal-pane-resize-handle {
+  touch-action: none;
+  background: oklch(0.85 0.2 196 / 0.15);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.arsenal-pane-resize-handle::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: oklch(0.85 0.2 196 / 0.55);
+  box-shadow: 0 0 8px oklch(0.85 0.2 196 / 0.35);
+}
+
+.arsenal-pane-resize-handle:hover,
+.arsenal-pane-resize-handle[data-resizing="true"] {
+  background: oklch(0.85 0.2 196 / 0.28);
+  box-shadow: inset 0 0 12px oklch(0.85 0.2 196 / 0.2);
+}

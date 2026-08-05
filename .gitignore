@@ -39,3 +39,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local-only work tool assets (must not ship to Vercel / public repo)
+# canonical copies live outside this repo in programming-bukiko-local-static/
+passwords_backup*.json
+reply_backup*.json
+password-manager.html
+reply_assistant.html
+fax-template.html
+hg_logo.jpg
+license-ledger*.html
+ライセンス台帳*.html
+/public/passwords_backup*.json
+/public/reply_backup*.json
+/public/password-manager.html
+/public/reply_assistant.html
+/public/fax-template.html
+/public/hg_logo.jpg
+/public/ライセンス台帳*.html
+/public/license-ledger*.html
+/public/パスワード管理.html

@@ -16,7 +16,7 @@
  * ```
  */
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Wrench,
   ExternalLink,
@@ -43,13 +43,45 @@ import {
 } from "@/components/ui/sidebar";
 import { Pane1Toggle } from "@/components/workspace/Pane1Toggle";
 import { fileUrlToWindowsPath } from "@/lib/file-url-to-windows-path";
+import { isWebLaunchUrl } from "@/lib/arsenal-public";
 import { cn } from "@/lib/utils";
 
 type ArsenalWorkspaceProps = {
   categories: ToolCategory[];
+  /** true のとき公開ポートフォリオ用の出し分け（summary バッジ・起動ボタン制限） */
+  publicMode?: boolean;
 };
 
-export function ArsenalWorkspace({ categories }: ArsenalWorkspaceProps) {
+const PANE2_WIDTH_STORAGE_KEY = "programming-bukiko:arsenal-pane2-width";
+const PANE2_DEFAULT_WIDTH = 288;
+const PANE2_MIN_WIDTH = 200;
+const PANE3_MIN_WIDTH = 240;
+const PANE_RESIZE_HANDLE_WIDTH = 6;
+
+function readStoredPane2Width(): number {
+  if (typeof window === "undefined") return PANE2_DEFAULT_WIDTH;
+  try {
+    const raw = localStorage.getItem(PANE2_WIDTH_STORAGE_KEY);
+    if (raw == null) return PANE2_DEFAULT_WIDTH;
+    const parsed = Number.parseInt(raw, 10);
+    if (!Number.isFinite(parsed)) return PANE2_DEFAULT_WIDTH;
+    return Math.max(PANE2_MIN_WIDTH, parsed);
+  } catch {
+    return PANE2_DEFAULT_WIDTH;
+  }
+}
+
+function clampPane2Width(next: number, containerWidth: number): number {
+  const max =
+    containerWidth - PANE3_MIN_WIDTH - PANE_RESIZE_HANDLE_WIDTH;
+  if (max < PANE2_MIN_WIDTH) return PANE2_MIN_WIDTH;
+  return Math.min(max, Math.max(PANE2_MIN_WIDTH, next));
+}
+
+export function ArsenalWorkspace({
+  categories,
+  publicMode = false,
+}: ArsenalWorkspaceProps) {
   const firstCategory = categories[0];
   const firstTool = firstCategory?.tools[0] ?? null;
 
@@ -59,6 +91,14 @@ export function ArsenalWorkspace({ categories }: ArsenalWorkspaceProps) {
   const [selectedToolId, setSelectedToolId] = useState<string>(
     firstTool?.id ?? "",
   );
+  const [pane2Width, setPane2Width] = useState(PANE2_DEFAULT_WIDTH);
+  const [isResizingPanes, setIsResizingPanes] = useState(false);
+  const panesContainerRef = useRef<HTMLDivElement>(null);
+
+  // localStorage はマウント後にだけ読む（SSR とクライアントの不一致＝hydration mismatch を防ぐ）
+  useEffect(() => {
+    setPane2Width(readStoredPane2Width());
+  }, []);
 
   const activeCategory =
     categories.find((c) => c.id === selectedCategoryId) ?? firstCategory;
@@ -74,6 +114,53 @@ export function ArsenalWorkspace({ categories }: ArsenalWorkspaceProps) {
       setSelectedToolId(category.tools[0].id);
     }
   };
+
+  const handlePaneResizePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const container = panesContainerRef.current;
+      const handle = event.currentTarget;
+      if (!container) return;
+
+      handle.setPointerCapture(event.pointerId);
+      const startX = event.clientX;
+      const startWidth = pane2Width;
+      setIsResizingPanes(true);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+
+      const onPointerMove = (moveEvent: PointerEvent) => {
+        const rect = container.getBoundingClientRect();
+        const delta = moveEvent.clientX - startX;
+        setPane2Width(clampPane2Width(startWidth + delta, rect.width));
+      };
+
+      const finishResize = (finalEvent: PointerEvent) => {
+        handle.releasePointerCapture(finalEvent.pointerId);
+        handle.removeEventListener("pointermove", onPointerMove);
+        handle.removeEventListener("pointerup", finishResize);
+        handle.removeEventListener("pointercancel", finishResize);
+        setIsResizingPanes(false);
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+
+        const rect = container.getBoundingClientRect();
+        const delta = finalEvent.clientX - startX;
+        const finalWidth = clampPane2Width(startWidth + delta, rect.width);
+        setPane2Width(finalWidth);
+        try {
+          localStorage.setItem(PANE2_WIDTH_STORAGE_KEY, String(finalWidth));
+        } catch {
+          /* storage unavailable */
+        }
+      };
+
+      handle.addEventListener("pointermove", onPointerMove);
+      handle.addEventListener("pointerup", finishResize);
+      handle.addEventListener("pointercancel", finishResize);
+    },
+    [pane2Width],
+  );
 
   return (
     <SidebarProvider
@@ -132,16 +219,20 @@ export function ArsenalWorkspace({ categories }: ArsenalWorkspaceProps) {
         </header>
 
         {/* Pane 2 + Pane 3 */}
-        <div className="flex min-h-0 flex-1">
+        <div ref={panesContainerRef} className="flex min-h-0 flex-1">
           {/* Pane 2: ツール一覧 */}
-          <div className="pane2-cyber flex w-72 shrink-0 flex-col border-r border-border">
-            <ScrollArea className="flex-1">
+          <div
+            className="pane2-cyber flex min-h-0 shrink-0 flex-col"
+            style={{ width: pane2Width, minWidth: PANE2_MIN_WIDTH }}
+          >
+            <ScrollArea className="min-h-0 flex-1">
               <div className="flex flex-col gap-1 p-2">
                 {(activeCategory?.tools ?? []).map((tool) => (
                   <ToolListItem
                     key={tool.id}
                     tool={tool}
                     isSelected={tool.id === selectedToolId}
+                    publicMode={publicMode}
                     onSelect={() => setSelectedToolId(tool.id)}
                   />
                 ))}
@@ -154,8 +245,23 @@ export function ArsenalWorkspace({ categories }: ArsenalWorkspaceProps) {
             </ScrollArea>
           </div>
 
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="ツール一覧と詳細の幅を調整"
+            aria-valuemin={PANE2_MIN_WIDTH}
+            aria-valuenow={pane2Width}
+            data-resizing={isResizingPanes ? "true" : undefined}
+            className="arsenal-pane-resize-handle relative z-20 shrink-0 cursor-col-resize"
+            style={{ width: PANE_RESIZE_HANDLE_WIDTH }}
+            onPointerDown={handlePaneResizePointerDown}
+          />
+
           {/* Pane 3: ツール詳細 */}
-          <div className="hologram-panel flex min-w-0 flex-1 flex-col">
+          <div
+            className="hologram-panel flex min-h-0 min-w-0 flex-1 flex-col"
+            style={{ minWidth: PANE3_MIN_WIDTH }}
+          >
             {/* ぼかし背景レイヤー — 画像のテキストを消してロボットアームの形状だけ残す */}
             <div aria-hidden="true" className="pane3-bg" />
             {/* メカニカルフレーム — 四隅のブラケット */}
@@ -164,7 +270,11 @@ export function ArsenalWorkspace({ categories }: ArsenalWorkspaceProps) {
             <span aria-hidden="true" className="mech-corner mech-corner--bl" />
             <span aria-hidden="true" className="mech-corner mech-corner--br" />
             {activeTool ? (
-              <ToolDetailPanel key={activeTool.id} tool={activeTool} />
+              <ToolDetailPanel
+                key={activeTool.id}
+                tool={activeTool}
+                publicMode={publicMode}
+              />
             ) : (
               <div className="flex flex-1 items-center justify-center">
                 <p className="text-sm text-muted-foreground">
@@ -184,10 +294,12 @@ export function ArsenalWorkspace({ categories }: ArsenalWorkspaceProps) {
 type ToolListItemProps = {
   tool: Tool;
   isSelected: boolean;
+  publicMode: boolean;
   onSelect: () => void;
 };
 
-function ToolListItem({ tool, isSelected, onSelect }: ToolListItemProps) {
+function ToolListItem({ tool, isSelected, publicMode, onSelect }: ToolListItemProps) {
+  const showSummaryBadge = publicMode && tool.visibility === "summary";
   return (
     <button
       type="button"
@@ -199,7 +311,10 @@ function ToolListItem({ tool, isSelected, onSelect }: ToolListItemProps) {
     >
       <div className="flex items-center justify-between gap-2">
         <span className="truncate text-sm font-semibold text-foreground">{tool.name}</span>
-        <StatusBadge status={tool.status} />
+        <div className="flex shrink-0 items-center gap-1">
+          {showSummaryBadge && <SummaryBadge size="sm" />}
+          <StatusBadge status={tool.status} />
+        </div>
       </div>
       <p className="line-clamp-2 text-xs text-muted-foreground">{tool.description}</p>
     </button>
@@ -210,6 +325,7 @@ function ToolListItem({ tool, isSelected, onSelect }: ToolListItemProps) {
 
 type ToolDetailPanelProps = {
   tool: Tool;
+  publicMode: boolean;
 };
 
 /** http(s) / file / mailto 以外は同一オリジン上の相対パスとして解決する */
@@ -236,7 +352,7 @@ function windowsPathLeaf(winPath: string): string {
   return parts[parts.length - 1] || trimmed;
 }
 
-function ToolDetailPanel({ tool }: ToolDetailPanelProps) {
+function ToolDetailPanel({ tool, publicMode }: ToolDetailPanelProps) {
   const localExplorerAvailable = useMemo(() => {
     if (typeof window === "undefined") return false;
     const host = window.location.hostname;
@@ -250,44 +366,61 @@ function ToolDetailPanel({ tool }: ToolDetailPanelProps) {
 
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
+  const isSummary = tool.visibility === "summary";
+  const webLaunch = isWebLaunchUrl(tool.url);
   const fileWindowsPath =
-    tool.url?.startsWith("file:") && tool.url ? fileUrlToWindowsPath(tool.url) : null;
+    !publicMode && tool.url?.startsWith("file:") && tool.url
+      ? fileUrlToWindowsPath(tool.url)
+      : null;
+
+  /** 公開モードでの操作エリアの出し分け（ローカルでは常にフル操作） */
+  const publicActionKind = publicMode
+    ? isSummary
+      ? "summary"
+      : webLaunch
+        ? "web"
+        : "local-only"
+    : null;
+
+  const showSummaryBadge = publicMode && isSummary;
 
   return (
-    <ScrollArea className="flex-1">
-      <div className="p-6">
-      <div className="pane3-content flex flex-col gap-6">
-        {/* タイトルとステータス */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-4">
-            <h1 className="neon-text text-xl font-bold">{tool.name}</h1>
-            <StatusBadge status={tool.status} size="md" />
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-6">
+        <div className="pane3-content flex flex-col gap-6">
+          {/* タイトルとステータス */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="neon-text text-xl font-bold">{tool.name}</h1>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                {showSummaryBadge && <SummaryBadge size="md" />}
+                <StatusBadge status={tool.status} size="md" />
+              </div>
+            </div>
+            <p className="text-sm text-foreground">{tool.description}</p>
           </div>
-          <p className="text-sm text-foreground">{tool.description}</p>
-        </div>
 
-        <Separator />
+          <Separator />
 
-        {/* タグ */}
-        <div className="flex flex-col gap-2">
-          <div className="neon-label flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
-            <Tag className="size-3" />
-            タグ
+          {/* タグ */}
+          <div className="flex flex-col gap-2">
+            <div className="neon-label flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
+              <Tag className="size-3" />
+              タグ
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {tool.tags.map((tag) => (
+                <Badge key={tag} variant="secondary">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {tool.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </div>
 
-        <Separator />
+          <Separator />
 
-        {/* 実行情報（execInfo が有るときのみ表示） */}
-        {tool.execInfo && tool.execInfo.length > 0 && (
-          <>
+          {/* 実行情報（execInfo が有るときのみ表示） */}
+          {tool.execInfo && tool.execInfo.length > 0 && (
             <div className="flex flex-col gap-3">
               <p className="neon-label text-xs font-semibold uppercase tracking-wide">
                 実行情報
@@ -304,94 +437,30 @@ function ToolDetailPanel({ tool }: ToolDetailPanelProps) {
                 ))}
               </dl>
             </div>
-            <Separator />
-          </>
-        )}
+          )}
+        </div>
+      </div>
 
-        {/* 起動・操作 */}
+      {/* 起動・操作 — スクロール領域の外で常に表示 */}
+      <div className="pane3-actions sticky bottom-0 z-10 shrink-0 px-6 py-4">
         <div className="flex flex-col gap-3">
           <p className="neon-label text-xs font-semibold uppercase tracking-wide">
             操作
           </p>
           <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              {fileWindowsPath ? (
-                <>
-                  {localExplorerAvailable && (
-                    <Button
-                      type="button"
-                      className="neon-breathe gap-1.5"
-                      onClick={async () => {
-                        setActionMessage(null);
-                        try {
-                          const res = await fetch("/api/open-folder", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ path: fileWindowsPath }),
-                          });
-                          const data: { error?: string } = await res.json().catch(() => ({}));
-                          if (!res.ok) {
-                            setActionMessage(
-                              typeof data.error === "string" ? data.error : "開けませんでした",
-                            );
-                            return;
-                          }
-                          let copiedOk = false;
-                          try {
-                            await navigator.clipboard.writeText(fileWindowsPath);
-                            copiedOk = true;
-                          } catch {
-                            copiedOk = false;
-                          }
-                          const leaf = windowsPathLeaf(fileWindowsPath);
-                          setActionMessage(
-                            [
-                              copiedOk
-                                ? "フォルダーのパスをクリップボードにコピーしました。"
-                                : "クリップボードへのコピーに失敗しました。下に表示したパスをドラッグで選択し、右クリック→コピーしてください。",
-                              "",
-                              "エクスプローラーで開くには:",
-                              "1. キーボードで Win + E",
-                              "2. アドレスバーをクリック → Ctrl + V で貼り付け → Enter",
-                              "",
-                              `フォルダー「${leaf}」の場所:`,
-                              fileWindowsPath,
-                              "",
-                              "（参考）この PC 上の Next がエクスプローラー自動起動も試みますが、環境によってはウィンドウは出ません。",
-                            ].join("\n"),
-                          );
-                          window.setTimeout(() => setActionMessage(null), 25000);
-                        } catch {
-                          setActionMessage("通信に失敗しました");
-                        }
-                      }}
-                    >
-                      <FolderOpen className="size-4" />
-                      パスをコピーして開き方を表示
-                    </Button>
-                  )}
-                  {tool.url && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="gap-1.5"
-                      onClick={() => {
-                        setActionMessage(null);
-                        const href = resolveToolLaunchUrl(tool.url!);
-                        const win = window.open(href, "_blank", "noopener,noreferrer");
-                        if (win == null) {
-                          setActionMessage(
-                            "別タブを開けませんでした（ポップアップブロックの可能性）。ブラウザでポップアップを許可するか、URL を手入力してください。",
-                          );
-                        }
-                      }}
-                    >
-                      <ExternalLink className="size-4" />
-                      file:// を試す
-                    </Button>
-                  )}
-                </>
-              ) : tool.url ? (
+            {publicActionKind === "summary" ? (
+              <p className="text-xs text-muted-foreground">
+                このツールは詳細非公開です。起動 URL・実行情報は公開サイトでは表示しません。
+              </p>
+            ) : publicActionKind === "local-only" ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <LocalOnlyBadge />
+                <p className="text-xs text-muted-foreground">
+                  このツールはローカル環境でのみ実行できます。
+                </p>
+              </div>
+            ) : publicActionKind === "web" ? (
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
                   type="button"
                   className={cn(buttonVariants({ className: "neon-breathe gap-1.5" }))}
@@ -409,24 +478,122 @@ function ToolDetailPanel({ tool }: ToolDetailPanelProps) {
                   <ExternalLink className="size-4" />
                   ツールを起動
                 </Button>
-              ) : (
-                <Button type="button" disabled className="gap-1.5">
-                  <ExternalLink className="size-4" />
-                  ツールを起動
-                </Button>
-              )}
-              {tool.status === "wip" && (
-                <p className="text-xs text-muted-foreground">
-                  このツールは現在開発中です
-                </p>
-              )}
-              {!tool.url && tool.status !== "wip" && (
-                <p className="text-xs text-muted-foreground">
-                  起動 URL が未設定です
-                </p>
-              )}
-            </div>
-            {fileWindowsPath && (
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                {fileWindowsPath ? (
+                  <>
+                    {localExplorerAvailable && (
+                      <Button
+                        type="button"
+                        className="neon-breathe gap-1.5"
+                        onClick={async () => {
+                          setActionMessage(null);
+                          try {
+                            const res = await fetch("/api/open-folder", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ path: fileWindowsPath }),
+                            });
+                            const data: { error?: string } = await res.json().catch(() => ({}));
+                            if (!res.ok) {
+                              setActionMessage(
+                                typeof data.error === "string" ? data.error : "開けませんでした",
+                              );
+                              return;
+                            }
+                            let copiedOk = false;
+                            try {
+                              await navigator.clipboard.writeText(fileWindowsPath);
+                              copiedOk = true;
+                            } catch {
+                              copiedOk = false;
+                            }
+                            const leaf = windowsPathLeaf(fileWindowsPath);
+                            setActionMessage(
+                              [
+                                copiedOk
+                                  ? "フォルダーのパスをクリップボードにコピーしました。"
+                                  : "クリップボードへのコピーに失敗しました。下に表示したパスをドラッグで選択し、右クリック→コピーしてください。",
+                                "",
+                                "エクスプローラーで開くには:",
+                                "1. キーボードで Win + E",
+                                "2. アドレスバーをクリック → Ctrl + V で貼り付け → Enter",
+                                "",
+                                `フォルダー「${leaf}」の場所:`,
+                                fileWindowsPath,
+                                "",
+                                "（参考）この PC 上の Next がエクスプローラー自動起動も試みますが、環境によってはウィンドウは出ません。",
+                              ].join("\n"),
+                            );
+                            window.setTimeout(() => setActionMessage(null), 25000);
+                          } catch {
+                            setActionMessage("通信に失敗しました");
+                          }
+                        }}
+                      >
+                        <FolderOpen className="size-4" />
+                        パスをコピーして開き方を表示
+                      </Button>
+                    )}
+                    {tool.url && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="gap-1.5"
+                        onClick={() => {
+                          setActionMessage(null);
+                          const href = resolveToolLaunchUrl(tool.url!);
+                          const win = window.open(href, "_blank", "noopener,noreferrer");
+                          if (win == null) {
+                            setActionMessage(
+                              "別タブを開けませんでした（ポップアップブロックの可能性）。ブラウザでポップアップを許可するか、URL を手入力してください。",
+                            );
+                          }
+                        }}
+                      >
+                        <ExternalLink className="size-4" />
+                        file:// を試す
+                      </Button>
+                    )}
+                  </>
+                ) : tool.url ? (
+                  <Button
+                    type="button"
+                    className={cn(buttonVariants({ className: "neon-breathe gap-1.5" }))}
+                    onClick={() => {
+                      setActionMessage(null);
+                      const href = resolveToolLaunchUrl(tool.url!);
+                      const win = window.open(href, "_blank", "noopener,noreferrer");
+                      if (win == null) {
+                        setActionMessage(
+                          "別タブを開けませんでした（ポップアップブロックの可能性）。ブラウザでポップアップを許可してください。",
+                        );
+                      }
+                    }}
+                  >
+                    <ExternalLink className="size-4" />
+                    ツールを起動
+                  </Button>
+                ) : (
+                  <Button type="button" disabled className="gap-1.5">
+                    <ExternalLink className="size-4" />
+                    ツールを起動
+                  </Button>
+                )}
+                {tool.status === "wip" && (
+                  <p className="text-xs text-muted-foreground">
+                    このツールは現在開発中です
+                  </p>
+                )}
+                {!tool.url && tool.status !== "wip" && (
+                  <p className="text-xs text-muted-foreground">
+                    起動 URL が未設定です
+                  </p>
+                )}
+              </div>
+            )}
+            {!publicMode && fileWindowsPath && (
               <p className="text-xs text-muted-foreground">
                 ブラウザの仕様で、http ページからの file:// リンクは開けないことがあります。
                 「パスをコピーして開き方を表示」は、フォルダーのパスをクリップボードに載せ、エクスプローラーでの開き方を案内します。
@@ -444,8 +611,7 @@ function ToolDetailPanel({ tool }: ToolDetailPanelProps) {
           </div>
         </div>
       </div>
-      </div>
-    </ScrollArea>
+    </div>
   );
 }
 
@@ -474,6 +640,29 @@ function StatusBadge({ status, size = "sm" }: StatusBadgeProps) {
         <CircleDashed className="size-3" />
       )}
       {isActive ? "稼働中" : "開発中"}
+    </span>
+  );
+}
+
+function SummaryBadge({ size = "sm" }: { size?: "sm" | "md" }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1 rounded-full bg-muted font-medium text-muted-foreground",
+        size === "sm" ? "px-1.5 py-0.5 text-xs" : "px-2 py-1 text-sm",
+      )}
+    >
+      <CircleDashed className="size-3" />
+      詳細非公開
+    </span>
+  );
+}
+
+function LocalOnlyBadge() {
+  return (
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-1 text-sm font-medium text-muted-foreground">
+      <CircleDashed className="size-3" />
+      ローカル実行ツール
     </span>
   );
 }

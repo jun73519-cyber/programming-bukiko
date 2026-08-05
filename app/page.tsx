@@ -1,15 +1,19 @@
 import { ArsenalWorkspace } from "@/components/arsenal/ArsenalWorkspace";
-import toolsData from "@/data/tools.json";
-import { toolsDataSchema } from "@/lib/schema";
+import {
+  hydrateToolClassification,
+  isArsenalPublicMode,
+  projectToolsForPublic,
+} from "@/lib/arsenal-public";
+import { loadToolsData } from "@/lib/load-tools-data";
 
 export default function Page() {
-  const result = toolsDataSchema.safeParse(toolsData);
+  const data = loadToolsData();
+  const publicMode = isArsenalPublicMode();
+  const categories = publicMode
+    ? projectToolsForPublic(data).categories
+    : hydrateToolClassification(data).categories;
 
-  if (!result.success) {
-    throw new Error(
-      `tools.json の形式が正しくありません: ${result.error.issues[0]?.message}`,
-    );
-  }
-
-  return <ArsenalWorkspace categories={result.data.categories} />;
+  return (
+    <ArsenalWorkspace categories={categories} publicMode={publicMode} />
+  );
 }
