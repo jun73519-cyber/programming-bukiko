@@ -296,6 +296,28 @@
           ]
         },
         {
+          "id": "learning-voice-diagram-comment",
+          "name": "音声図解コメントツール",
+          "description": "AI に伝えるだけで図解ページを生成・公開し、見た人がテキスト選択・ピン・音声の3通りでコメントできる学習用プロジェクト。マイクに向かって喋ると Gemini が聞き取り、図解の該当箇所にピンを自動配置する。Must / Better / Want の3段階で優先度も伝えられる。",
+          "tags": ["図解", "フィードバック", "音声", "Gemini", "Next.js", "Vercel", "Surge.sh", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/src/voice-diagram-comment",
+          "execInfo": [
+            { "label": "ローカルパス", "value": "C:\\Users\\nozoe.HYPERGEAR\\src\\voice-diagram-comment" },
+            { "label": "コンセプト", "value": "図解に「喋って指摘できる」コメント機能を付ける。図解の公開先（Surge）とコメント基盤（Vercel）を分離し、基盤は1つ動かすだけで全図解に効く" },
+            { "label": "使い方", "value": "Cursor のチャットで「○○を図解して」→ コメント機能付きで Surge に自動公開" },
+            { "label": "コメント方法", "value": "テキスト選択で引用コメント／クリックでピン／マイクで音声（AI が該当箇所にピン自動配置）" },
+            { "label": "データ源", "value": "音声・テキスト入力（ブラウザのウィジェット経由）" },
+            { "label": "作業場所", "value": "クラウド（Vercel でバックエンド常駐 + Neon Postgres に保存、図解は Surge.sh 公開）" },
+            { "label": "技術", "value": "Next.js 16 / React 19 / TypeScript / esbuild（widget.js）/ Neon Postgres / Gemini API" },
+            { "label": "ツールURL", "value": "https://voice-diagram-comment-tool-coral.vercel.app" },
+            { "label": "セットアップ", "value": "Cursor で「セットアップして」→ setting-up-comment-tool スキルが対話ガイド（初回1回だけ）" },
+            { "label": "組み込み", "value": "他リポジトリの tools/ 配下にコピーして使える（手順は README に記載）" },
+            { "label": "ステータス", "value": "稼働中（2026-08-13 セットアップ完了・音声解析まで通し確認済み）" },
+            { "label": "詳細", "value": "リポジトリ直下 README.md" }
+          ]
+        },
+        {
           "id": "learning-progress-dashboard",
           "name": "進捗管理ダッシュボード",
           "description": "Linear のタスクデータを取得し、健康度を計算して Gemini で改善提案を生成、HTML ダッシュボードを Surge に公開して Slack にスクリーンショットを通知するパイプライン。マガジン制作などチームの進捗を毎朝可視化する学習用プロジェクト。",
@@ -377,6 +399,38 @@
             { "label": "進め方", "value": "元原稿を受け取る → 足りない具体を1問ずつ掘る → 6ステップ読み上げ原稿を Markdown で出力 → 品質チェック" },
             { "label": "構成", "value": "フック → 結論 → なぜ（絵） → どうやって → どうなる（絵） → クロージング" },
             { "label": "原則", "value": "説明するな、体験させろ。エピソードはユーザーが語った事実のみ（AIが創作しない）" }
+          ]
+        },
+        {
+          "id": "learning-grill-me",
+          "name": "grill-me（設計インタビュースキル）",
+          "description": "計画や設計について1問ずつ容赦なく質問を重ね、共通理解に達するまで決定ツリーの各分岐を解決する Claude スキル。実装やファイル作成はせず、推奨案付きで上流から分岐を潰していく。",
+          "tags": ["スキル", "設計", "要件定義", "Claude", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/.claude/skills/grill-me",
+          "execInfo": [
+            { "label": "本体", "value": "SKILL.md（grill-me）" },
+            { "label": "場所", "value": "C:\\Users\\nozoe.HYPERGEAR\\.claude\\skills\\grill-me\\" },
+            { "label": "起動", "value": "Cursor / Claude で「グリルして」「grill me」「計画を詰めて」「設計をストレステストして」などと依頼" },
+            { "label": "進め方", "value": "入力を理解 → 決定ツリーを洗い出す → 1問ずつ推奨案付きで聞く → 合意を短くまとめて終了" },
+            { "label": "観点", "value": "ゴール / スコープ / UI・UX / データ / 状態・同期 / エッジケース / トレードオフ / 非機能 / ロールアウト" },
+            { "label": "原則", "value": "1問ずつ。推奨案必須。コードで分かることは聞かない。依存の上流から解く。実装には入らない" }
+          ]
+        },
+        {
+          "id": "learning-writing-proposals",
+          "name": "writing-proposals（提案スキル）",
+          "description": "誰かに何かを提案したいとき、対話で材料を引き出し、結論ファーストで意思決定者に刺さる提案文書を作る Claude スキル。テンプレート埋めではなく、書く前に上流（誰に・相手の問い・何を言い切るか）を整えてから書く。",
+          "tags": ["スキル", "提案", "文書", "Claude", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/.claude/skills/writing-proposals",
+          "execInfo": [
+            { "label": "本体", "value": "SKILL.md（writing-proposals）" },
+            { "label": "場所", "value": "C:\\Users\\nozoe.HYPERGEAR\\.claude\\skills\\writing-proposals\\" },
+            { "label": "起動", "value": "Cursor / Claude で「提案文を作って」「提案書を書いて」「◯◯を提案したい」「writing-proposals」などと依頼" },
+            { "label": "進め方", "value": "思いつきを受け取る → 上流（相手・問い・結論）を対話で固める → 結論ファーストの提案文書を出力" },
+            { "label": "原則", "value": "上流を整えてから書く。1問ずつ＋推奨案必須。確認していないことを書かない" },
+            { "label": "関連", "value": "通す場の読み上げ原稿は writing-presentations。設計の分岐潰しは grill-me" }
           ]
         }
       ]
