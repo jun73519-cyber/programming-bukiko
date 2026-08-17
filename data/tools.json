@@ -241,6 +241,23 @@
             { "label": "API", "value": "Claude API（claude-sonnet-4）" },
             { "label": "モード", "value": "読書（SAKURA+＋note）／映画（note＋映画.com）" }
           ]
+        },
+        {
+          "id": "wishlist-map-tool",
+          "name": "行きたい場所マップ帳",
+          "description": "行きたい場所を「気になる／訪問済」で管理する個人用マップ帳。4ペインで一覧・詳細・地図・統計を並べ、訪問後は感想と実費（宿泊・交通・滞在）を記録できる。",
+          "tags": ["旅行", "地図", "Next.js", "Neon", "個人開発"],
+          "status": "active",
+          "url": "http://localhost:3002",
+          "execInfo": [
+            { "label": "コンセプト", "value": "行きたい場所の検討と、行ったあとの記録を同じ画面で持つ" },
+            { "label": "データ源", "value": "Neon Postgres（places テーブル。場所データは JSONB、感想は visited_note）" },
+            { "label": "作業場所", "value": "C:\\Users\\nozoe.HYPERGEAR\\src\\wishlist-map-tool" },
+            { "label": "起動", "value": "npm run dev。3000/3001 が他アプリ使用中なら http://localhost:3002" },
+            { "label": "技術", "value": "Next.js 16 / React 19 / Tailwind v4 / shadcn/ui / Leaflet / Neon" },
+            { "label": "ソース", "value": "https://github.com/jun73519-cyber/wishlist-map-tool（private）" },
+            { "label": "ステータス", "value": "稼働中（ローカル・プライベート）" }
+          ]
         }
       ]
     },
@@ -431,6 +448,59 @@
             { "label": "進め方", "value": "思いつきを受け取る → 上流（相手・問い・結論）を対話で固める → 結論ファーストの提案文書を出力" },
             { "label": "原則", "value": "上流を整えてから書く。1問ずつ＋推奨案必須。確認していないことを書かない" },
             { "label": "関連", "value": "通す場の読み上げ原稿は writing-presentations。設計の分岐潰しは grill-me" }
+          ]
+        },
+        {
+          "id": "learning-surprise-writing-rules",
+          "name": "Surprise文章ルール",
+          "description": "AI-Driven School運営会社・株式会社Surpriseの社内文章ルール。結論ファースト、■→◎→・の階層、事実・解釈・提案の分離、推奨案つき選択肢、期限・数値の具体化など。提案スキルを自分用にカスタマイズするときの参考資料。",
+          "tags": ["文章ルール", "提案", "学習", "Surprise", "ドキュメント"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/.claude/skills/surprise-writing-rules/Surprise文章ルール.md",
+          "execInfo": [
+            { "label": "本体", "value": "Surprise文章ルール.md" },
+            { "label": "場所", "value": "C:\\Users\\nozoe.HYPERGEAR\\.claude\\skills\\surprise-writing-rules\\" },
+            { "label": "起動", "value": "武器庫から開く／Cursor やエディタで Markdown を開く" },
+            { "label": "要点", "value": "結論を先に。1文は短く。情報は■→◎→・。事実・解釈・提案を分ける。選択肢には推奨案＋理由。期限・数値・抽象語は具体化" },
+            { "label": "判断基準", "value": "相手が一度読んだだけで、同じ情景が頭に浮かぶか" },
+            { "label": "用途", "value": "Slack・ドキュメント作成の指針。writing-proposals をカスタマイズするときの参考" },
+            { "label": "関連", "value": "writing-proposals（提案スキル）／writing-presentations（発表原稿）" }
+          ]
+        },
+        {
+          "id": "learning-morning-line-bot",
+          "name": "morning-line-bot（朝活記録ツール）",
+          "description": "朝活グループの遅刻を記録し、罰金を自動集計する LINE Bot。グループに「遅刻」と投稿するだけで回数と罰金額を管理し、毎月1日に前月の集計レポートを配信する。",
+          "tags": ["LINE", "GAS", "スプレッドシート", "自動化", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/src/morning-line-bot",
+          "execInfo": [
+            { "label": "本体", "value": "Google Apps Script（LINE Webhook を doPost で直接受信）" },
+            { "label": "場所", "value": "C:\\Users\\nozoe.HYPERGEAR\\src\\morning-line-bot\\" },
+            { "label": "トリガー", "value": "LINE Webhook（コマンド投稿時）＋ GAS 時間トリガー（毎月1日の集計）" },
+            { "label": "ソース元", "value": "Google スプレッドシート（遅刻記録ログ）" },
+            { "label": "作業場所", "value": "Google Apps Script（コマンド解析・集計・レポート生成・LINE返信）" },
+            { "label": "コマンド", "value": "遅刻 / 追加 / 集計 / 履歴 / 取消 / ヘルプ（代理記録は @名前）" },
+            { "label": "ルール", "value": "遅刻1回 = 500円。毎月1日に前月集計を自動配信" },
+            { "label": "詳細", "value": "リポジトリ直下 README.md" }
+          ]
+        },
+        {
+          "id": "learning-realtime-minutes",
+          "name": "realtime-minutes（リアルタイム議事録ツール）",
+          "description": "会議音声をリアルタイムで文字起こしし、30秒ごとに AI がタスク（誰が・いつまでに・何を）を自動抽出するツール。会議後に transcript.md と tasks.md が手元に残る。",
+          "tags": ["議事録", "音声認識", "Deepgram", "Gemini", "学習"],
+          "status": "active",
+          "url": "file:///C:/Users/nozoe.HYPERGEAR/src/realtime-minutes",
+          "execInfo": [
+            { "label": "本体", "value": "Node.js + Vite（フロント）／サーバー（Deepgram 中継・Gemini タスク抽出）" },
+            { "label": "場所", "value": "C:\\Users\\nozoe.HYPERGEAR\\src\\realtime-minutes\\" },
+            { "label": "起動", "value": "just start → ブラウザで http://localhost:5173" },
+            { "label": "前提", "value": "Node.js 20+／pnpm／just。Deepgram と Google AI の API キーを .env に設定" },
+            { "label": "処理", "value": "マイク → Deepgram 文字起こし → Gemini がタスク抽出" },
+            { "label": "出力", "value": "transcript.md（全文・タイムスタンプ）／tasks.md（担当・期限・根拠つき一覧）" },
+            { "label": "設定", "value": "config.yaml で参加者名・キーターム・置換ルールを指定すると精度向上" },
+            { "label": "詳細", "value": "リポジトリ直下 README.md" }
           ]
         }
       ]
