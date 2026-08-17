@@ -253,7 +253,7 @@
             { "label": "コンセプト", "value": "行きたい場所の検討と、行ったあとの記録を同じ画面で持つ" },
             { "label": "データ源", "value": "Neon Postgres（places テーブル。場所データは JSONB、感想は visited_note）" },
             { "label": "作業場所", "value": "C:\\Users\\nozoe.HYPERGEAR\\src\\wishlist-map-tool" },
-            { "label": "起動", "value": "npm run dev。3000/3001 が他アプリ使用中なら http://localhost:3002" },
+            { "label": "起動", "value": "先にこのリポジトリで npm run dev（常に http://localhost:3002）。サーバー未起動だと武器庫の「ツールを起動」は開けない" },
             { "label": "技術", "value": "Next.js 16 / React 19 / Tailwind v4 / shadcn/ui / Leaflet / Neon" },
             { "label": "ソース", "value": "https://github.com/jun73519-cyber/wishlist-map-tool（private）" },
             { "label": "ステータス", "value": "稼働中（ローカル・プライベート）" }
