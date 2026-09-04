@@ -502,6 +502,19 @@
             { "label": "設定", "value": "config.yaml で参加者名・キーターム・置換ルールを指定すると精度向上" },
             { "label": "詳細", "value": "リポジトリ直下 README.md" }
           ]
+        },
+        {
+          "id": "learning-claude-code",
+          "name": "Claude Code",
+          "description": "ターミナルで動くコーディング用の Claude。コードベースを読み込み、ファイル編集・コマンド実行・Git 操作までエージェントとして自律的にこなす Anthropic 公式 CLI。",
+          "tags": ["Claude", "CLI", "エージェント", "コーディング", "学習"],
+          "status": "active",
+          "url": "https://claude.com/claude-code",
+          "execInfo": [
+            { "label": "本体", "value": "Anthropic 公式 CLI（claude コマンド）" },
+            { "label": "起動", "value": "Cursor のターミナルで claude を実行" },
+            { "label": "できること", "value": "コードベースの読解・ファイル編集・コマンド実行・Git 操作をエージェントが自律実行" }
+          ]
         }
       ]
     }
