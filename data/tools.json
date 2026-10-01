@@ -248,15 +248,15 @@
           "description": "行きたい場所を「気になる／訪問済」で管理する個人用マップ帳。4ペインで一覧・詳細・地図・統計を並べ、訪問後は感想と実費（宿泊・交通・滞在）を記録できる。",
           "tags": ["旅行", "地図", "Next.js", "Neon", "個人開発"],
           "status": "active",
-          "url": "http://localhost:3002",
+          "url": "https://wishlist-map-tool.vercel.app/",
           "execInfo": [
             { "label": "コンセプト", "value": "行きたい場所の検討と、行ったあとの記録を同じ画面で持つ" },
             { "label": "データ源", "value": "Neon Postgres（places テーブル。場所データは JSONB、感想は visited_note）" },
             { "label": "作業場所", "value": "C:\\Users\\nozoe.HYPERGEAR\\src\\wishlist-map-tool" },
-            { "label": "起動", "value": "先にこのリポジトリで npm run dev（常に http://localhost:3002）。サーバー未起動だと武器庫の「ツールを起動」は開けない" },
+            { "label": "起動", "value": "武器庫の「ツールを起動」で https://wishlist-map-tool.vercel.app/ が開く。ローカル開発時は npm run dev（http://localhost:3002）" },
             { "label": "技術", "value": "Next.js 16 / React 19 / Tailwind v4 / shadcn/ui / Leaflet / Neon" },
             { "label": "ソース", "value": "https://github.com/jun73519-cyber/wishlist-map-tool（private）" },
-            { "label": "ステータス", "value": "稼働中（ローカル・プライベート）" }
+            { "label": "ステータス", "value": "稼働中（Vercel本番・個人用）" }
           ]
         }
       ]
