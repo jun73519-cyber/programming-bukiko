@@ -134,13 +134,15 @@
         {
           "id": "osusume-list",
           "name": "おすすめリスト",
-          "description": "おすすめされたお店や本をまとめたパーソナルリスト。本のギャラリー（読了・評価・感想）と飲食店リストを Google スプレッドシート経由でクラウド同期。PC / スマホ（PWA）で使える。",
-          "tags": ["パーソナル", "まとめ", "PWA"],
+          "description": "おすすめされたお店や本をまとめたパーソナルリスト。本のギャラリー（読了・評価・感想）と飲食店リストを Google スプレッドシート経由でクラウド同期。「近くの営業中のお店」ボタンで、現在地から近い順にいま営業中のお店を閉店時刻付きで表示できる。PC / スマホ（PWA）で使える。",
+          "tags": ["パーソナル", "まとめ", "PWA", "位置情報"],
           "status": "active",
           "url": "https://osusume-list.vercel.app/",
           "execInfo": [
             { "label": "コンセプト", "value": "人からおすすめされた飲食店や本" },
             { "label": "データ源",   "value": "Google スプレッドシート（GAS 同期）" },
+            { "label": "外部API",    "value": "Google Places API (New)（GAS 経由・キーはスクリプトプロパティ）" },
+            { "label": "主な機能",   "value": "近くの営業中のお店（座標・営業時間をシートにキャッシュ、1日300回上限）" },
             { "label": "ホスティング", "value": "Vercel + GitHub（push で自動デプロイ）" },
             { "label": "利用形態",   "value": "PC / スマホアプリ（PWA）完全同期" },
             { "label": "ステータス", "value": "稼働中" }
