@@ -262,7 +262,7 @@
           ]
         },
         {
-          "id": "bangumi-summary",
+          "id": "gakucho-live-summary",
           "name": "番組要約ツール（学長ライブ）",
           "description": "翌朝で公開が終わる学長ライブを平日に自動で見つけ、聞かずに読んで追いつける要約にして保存する。結論と箇条書きでまとめ、エピソードは💬で残し、文字起こしに根拠のない箇所には⚠をつける。",
           "tags": [
@@ -272,37 +272,7 @@
             "Python",
             "自動化"
           ],
-          "status": "active",
-          "execInfo": [
-            {
-              "label": "トリガー",
-              "value": "Windowsタスクスケジューラ「番組要約 学長ライブ」（平日12:30。失敗したら15:30に再挑戦。要約済みなら何もしない）"
-            },
-            {
-              "label": "ソース元",
-              "value": "YouTube 両学長 リベラルアーツ大学のその日のライブ（自動文字起こし＋説明欄のチャプター）"
-            },
-            {
-              "label": "処理",
-              "value": "Gemini APIで型どおりに要約し、文字起こしと照合。15:30でも失敗したら⚠メモを残す（ライブがない日は何も残さない）"
-            },
-            {
-              "label": "作業場所",
-              "value": "C:\\Users\\nozoe.HYPERGEAR\\src\\bangumi-summary"
-            },
-            {
-              "label": "届け先",
-              "value": "G:\\マイドライブ\\Claude作業記録\\番組要約\\学長ライブ\\（配信日 タイトル.md）"
-            },
-            {
-              "label": "ソース",
-              "value": "https://github.com/jun73519-cyber/bangumi-summary（private）"
-            },
-            {
-              "label": "ステータス",
-              "value": "稼働中（会社PCで試作中）"
-            }
-          ]
+          "status": "active"
         }
       ]
     },
